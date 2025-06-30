@@ -1,0 +1,55 @@
+{
+  "canisters": {
+    "market": {
+      "main": "../motoko_classes/ICRC8IntentMarketplace-mo/src/main.mo",
+      "type": "motoko",
+      "gzip": true
+    },
+    "nft1": {
+      "candid": "src/backend/nft/icrc7.did",
+      "type": "custom",
+      "wasm": "src/backend/nft/icrc7.wasm.gz"
+    },
+    "nft2": {
+      "candid": "src/backend/nft/icrc7.did",
+      "type": "custom",
+      "wasm": "src/backend/nft/icrc7.wasm.gz"
+    },
+    "nft3": {
+      "candid": "src/backend/nft/icrc7.did",
+      "type": "custom",
+      "wasm": "src/backend/nft/icrc7.wasm.gz"
+    },
+    
+    "token": {
+      "candid": "src/backend/token/token.did",
+      "type": "custom",
+      "wasm": "src/backend/token/token.wasm"
+    },
+    "icp": {
+      "main": "/Users/afat/Dropbox/development/PanIndustrial/code/ICRC_fungible/src/Token.mo",
+      "type": "motoko",
+      "gzip": true
+    },
+    "frontend": {
+      "dependencies": [
+        "backend"
+      ],
+      "source": [
+        "src/frontend/dist"
+      ],
+      "type": "assets",
+      "declarations": {
+        "output": "src/frontend/declarations"
+      }
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": "mops sources"
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
