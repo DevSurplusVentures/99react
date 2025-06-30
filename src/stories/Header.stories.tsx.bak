@@ -1,0 +1,33 @@
+import type { Meta, StoryObj } from '@storybook/react';
+
+import { Header } from './Header';
+
+const meta: Meta<typeof Header> = {
+  title: 'Example/Header',
+  component: Header,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof Header>;
+
+export const LoggedIn: Story = {
+  render: () => (
+    <Header user={{ name: 'Jane Doe' }} onLogin={() => {}} onLogout={() => {}} onCreateAccount={() => {}} />
+  ),
+};
+
+export const LoggedOut: Story = {
+  render: () => (
+    <Header onLogin={() => {}} onLogout={() => {}} onCreateAccount={() => {}} />
+  ),
+};
+
+export const Default: Story = {
+  render: () => (
+    <Header className="storybook-header" user={{ name: 'Jane Doe' }} onLogin={() => {}} onLogout={() => {}} onCreateAccount={() => {}} />
+  ),
+};
