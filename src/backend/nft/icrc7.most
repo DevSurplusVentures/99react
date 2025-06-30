@@ -1,0 +1,242 @@
+// Version: 1.0.0
+type Account = {owner : Principal; subaccount : ?Subaccount};
+type Account__3 = Account;
+type Account__4 = Account__3;
+type ApprovalInfo =
+  {
+    created_at_time : ?Nat64;
+    expires_at : ?Nat64;
+    from_subaccount : ?Blob;
+    memo : ?Blob;
+    spender : Account__4
+  };
+type ArgList =
+  {
+    allow_transfers : ?Bool;
+    burn_account : ?Account;
+    default_take_value : ?Nat;
+    deployer : Principal;
+    description : ?Text;
+    logo : ?Text;
+    max_memo_size : ?Nat;
+    max_query_batch_size : ?Nat;
+    max_take_value : ?Nat;
+    max_update_batch_size : ?Nat;
+    name : ?Text;
+    permitted_drift : ?Nat;
+    supply_cap : ?Nat;
+    supported_standards : ?SupportedStandards;
+    symbol : ?Text;
+    tx_window : ?Nat
+  };
+type ArgList__1 =
+  {
+    collection_approval_requires_token : ?Bool;
+    deployer : Principal;
+    max_approvals : ?Nat;
+    max_approvals_per_token_or_collection : ?Nat;
+    max_revoke_approvals : ?Nat;
+    settle_to_approvals : ?Nat
+  };
+type Args__2 = ?InitArgs__3;
+type BlockType = {block_type : Text; url : Text};
+type Candy =
+  {
+    #Array : StableBuffer<Candy>;
+    #Blob : Blob;
+    #Bool : Bool;
+    #Bytes : StableBuffer<Nat8>;
+    #Class : Map__12<Text, Property>;
+    #Float : Float;
+    #Floats : StableBuffer<Float>;
+    #Int : Int;
+    #Int16 : Int16;
+    #Int32 : Int32;
+    #Int64 : Int64;
+    #Int8 : Int8;
+    #Ints : StableBuffer<Int>;
+    #Map : Map__12<Text, Candy>;
+    #Nat : Nat;
+    #Nat16 : Nat16;
+    #Nat32 : Nat32;
+    #Nat64 : Nat64;
+    #Nat8 : Nat8;
+    #Nats : StableBuffer<Nat>;
+    #Option : ?Candy;
+    #Principal : Principal;
+    #Set : Set__12<Candy>;
+    #Text : Text;
+    #ValueMap : Map__12<Candy, Candy>
+  };
+type Hash__2 = Blob;
+type IndexType = {#Managed; #Stable; #StableTyped};
+type Indexes =
+  {
+    nft_to_owner : Map__12<Nat, Account>;
+    owner_to_nfts : Map__12<Account, Set__12<Nat>>;
+    recent_transactions : Map__12<Blob, (Int, Nat)>
+  };
+type Indexes__2 =
+  {
+    owner_to_approval_account :
+      Map__26<Account__4, Set__25<(?Nat, Account__4)>>;
+    token_to_approval_account : Map__26<?Nat, Set__25<Account__4>>
+  };
+type InitArgList = ArgList;
+type InitArgList__1 = ArgList__1;
+type InitArgs__3 =
+  {
+    archiveControllers : ??[Principal];
+    archiveCycles : Nat;
+    archiveIndexType : IndexType;
+    maxActiveRecords : Nat;
+    maxArchivePages : Nat;
+    maxRecordsInArchiveInstance : Nat;
+    maxRecordsToArchive : Nat;
+    settleToRecords : Nat;
+    supportedBlocks : [BlockType]
+  };
+type InitArgs__5 = Args__2;
+type Interval = {len : IntervalLength; prefix : Prefix};
+type IntervalLength = Nat;
+type Key__1 = Blob;
+type LabeledTree = {#leaf : Leaf; #subtree : OT};
+type Leaf = {leaf_hash : Hash__2; value : Value__11};
+type LedgerInfo =
+  {
+    var allow_transfers : Bool;
+    var burn_account : ?Account;
+    var default_take_value : Nat;
+    var description : ?Text;
+    var logo : ?Text;
+    var max_memo_size : Nat;
+    var max_query_batch_size : Nat;
+    var max_take_value : Nat;
+    var max_update_batch_size : Nat;
+    var name : ?Text;
+    var permitted_drift : Nat;
+    var supply_cap : ?Nat;
+    var symbol : ?Text;
+    var tx_window : Nat
+  };
+type LedgerInfo__2 =
+  {
+    var collection_approval_requires_token : Bool;
+    var max_approvals : Nat;
+    var max_approvals_per_token_or_collection : Nat;
+    var max_revoke_approvals : Nat;
+    var settle_to_approvals : Nat
+  };
+type Map<K, V> = [var ?([var ?K], [var ?V], [var Nat], [var Nat32])];
+type Map__12<K, V> = Map<K, V>;
+type Map__14<K, V> = [var ?([var ?K], [var ?V], [var Nat], [var Nat32])];
+type Map__26<K, V> = Map__14<K, V>;
+type NFT = {meta : Candy; var owner : ?Account};
+type OT = ?T__235;
+type Prefix = [Nat8];
+type Prefix__1 = [Nat8];
+type Property = {immutable : Bool; name : Text; value : Candy};
+type Set<K> = [var ?([var ?K], [var Nat], [var Nat32])];
+type Set__12<K> = Set<K>;
+type Set__13<K> = [var ?([var ?K], [var Nat], [var Nat32])];
+type Set__25<K> = Set__13<K>;
+type StableBuffer<X> =
+  {var count : Nat; var elems : [var ?X]; initCapacity : Nat};
+type State =
+  {
+    indexes : Indexes;
+    ledger : Vector<Value>;
+    ledger_info : LedgerInfo;
+    nfts : Map__12<Nat, NFT>;
+    var owner : Principal;
+    var supported_standards : SupportedStandards
+  };
+type State__3 =
+  {
+    indexes : Indexes__2;
+    ledger_info : LedgerInfo__2;
+    token_approvals : Map__26<(?Nat, Account__4), ApprovalInfo>
+  };
+type State__6 =
+  {
+    archives : Map__12<Principal, TransactionRange>;
+    var bCleaning : Bool;
+    var cleaningTimer : ?Nat;
+    constants :
+      {
+        archiveProperties :
+          {
+            var archiveControllers : ??[Principal];
+            var archiveCycles : Nat;
+            var archiveIndexType : IndexType;
+            var maxActiveRecords : Nat;
+            var maxArchivePages : Nat;
+            var maxRecordsInArchiveInstance : Nat;
+            var maxRecordsToArchive : Nat;
+            var settleToRecords : Nat
+          }
+      };
+    var firstIndex : Nat;
+    var lastIndex : Nat;
+    var latest_hash : ?Blob;
+    var ledger : Vector<Transaction__2>;
+    ledgerCanister : Principal;
+    supportedBlocks : Vector<BlockType>
+  };
+type Subaccount = Blob;
+type SupportedStandards = [{name : Text; url : Text}];
+type T__235 =
+  {
+    #fork :
+      {hash : Hash__2; interval : Interval; left : T__235; right : T__235};
+    #prefix :
+      {
+        here : LabeledTree;
+        key : Key__1;
+        labeled_hash : Hash__2;
+        prefix : Prefix__1;
+        rest : OT;
+        tree_hash : Hash__2
+      }
+  };
+type TransactionRange = {length : Nat; start : Nat};
+type Transaction__2 = Value__8;
+type Tree = LabeledTree;
+type Value =
+  {
+    #Array : [Value];
+    #Blob : Blob;
+    #Int : Int;
+    #Map : [(Text, Value)];
+    #Nat : Nat;
+    #Text : Text
+  };
+type Value__11 = Blob;
+type Value__8 =
+  {
+    #Array : [Value__8];
+    #Blob : Blob;
+    #Int : Int;
+    #Map : [(Text, Value__8)];
+    #Nat : Nat;
+    #Text : Text
+  };
+type Vector<X> =
+  {var data_blocks : [var [var ?X]]; var i_block : Nat; var i_element : Nat};
+actor {
+  stable var _init : Bool;
+  stable cert_store : {var tree : Tree};
+  stable var icrc37_migration_state :
+    {#v0_0_0 : {#data; #id}; #v0_1_0 : {#data : State__3; #id}};
+  stable var icrc3_migration_state :
+    {#v0_0_0 : {#data; #id}; #v0_1_0 : {#data : State__6; #id}};
+  stable var icrc7_migration_state :
+    {#v0_0_0 : {#data; #id}; #v0_1_0 : {#data : State; #id}};
+  stable var init_msg : {caller : Principal};
+  stable var original_args :
+    {
+      icrc37_args : ?InitArgList__1;
+      icrc3_args : InitArgs__5;
+      icrc7_args : ?InitArgList
+    }
+};

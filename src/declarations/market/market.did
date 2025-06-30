@@ -1,0 +1,289 @@
+type Value__1 = 
+ variant {
+   Array: vec Value__1;
+   Blob: blob;
+   Map: vec record {
+              text;
+              Value__1;
+            };
+   Nat: nat;
+   Text: text;
+ };
+type ValidationErrors = 
+ variant {
+   Generic: text;
+   NoExecution;
+ };
+type ValidateIntentsResponse = 
+ variant {
+   Error: ValidationErrors;
+   Ok:
+    variant {
+      execution:
+       variant {
+         full: vec TokenSpecResult;
+         partial: vec TokenSpecResult;
+       };
+      temporary:
+       variant {
+         full: vec TokenSpecResult;
+         partial: vec TokenSpecResult;
+       };
+    };
+ };
+type TxIndex = nat;
+type TransferResult = 
+ variant {
+   Err: TransferError;
+   Ok: TxIndex;
+ };
+type TransferError = 
+ variant {
+   BadBurn: record {min_burn_amount: Balance;};
+   BadFee: record {expected_fee: Balance;};
+   CreatedInFuture: record {ledger_time: Timestamp;};
+   Duplicate: record {duplicate_of: TxIndex;};
+   GenericError: record {
+                   error_code: nat;
+                   message: text;
+                 };
+   InsufficientFunds: record {balance: Balance;};
+   TemporarilyUnavailable;
+   TooOld;
+ };
+type TokenSpecResult = 
+ record {
+   canister: principal;
+   intent_id: opt nat;
+   inventory: opt Inventory;
+   meta: opt vec TokenMeta;
+   namespace: opt text;
+   receiving_account: Account__1;
+   result: variant {
+             Err: text;
+             Ok: vec nat;
+           };
+   sending_account: Account__1;
+   token_pointer: opt blob;
+ };
+type TokenSpec = 
+ record {
+   canister: principal;
+   inventory: opt Inventory;
+   meta: opt vec TokenMeta;
+   token_pointer: opt blob;
+ };
+type TokenMeta = 
+ variant {
+   approval_fee: nat;
+   decimals: nat;
+   external_fee: TokenSpec;
+   standards: vec ICRCStandards;
+   transfer_fee: nat;
+   transfer_from_fee: nat;
+ };
+type Timestamp = nat64;
+type Time = nat;
+type Subaccount = blob;
+type ManageMarketResponse = 
+ variant {
+   distribute_intent: variant {
+                        Err: GenericError;
+                        Ok: ActionResult;
+                      };
+   end_intent: variant {
+                 Err: GenericError;
+                 Ok: ActionResult;
+               };
+   execute_intent: variant {
+                     Err: GenericError;
+                     Ok: ActionResult;
+                   };
+   list_intent: variant {
+                  Err: GenericError;
+                  Ok: ActionResult;
+                };
+   withdraw_escrow: variant {
+                      Err: GenericError;
+                      Ok: ActionResult;
+                    };
+   withdraw_settlement: variant {
+                          Err: GenericError;
+                          Ok: ActionResult;
+                        };
+ };
+type ManageMarketRequest = 
+ variant {
+   distribute_intent: nat;
+   end_intent: nat;
+   execute_intent:
+    record {
+      intent_ids: vec nat;
+      satisfying_intent: vec opt IntentFeature;
+    };
+   list_intent: vec opt IntentFeature;
+   withdraw_escrow: Escrow;
+   withdraw_settlement: Escrow;
+ };
+type Inventory = 
+ variant {
+   quantity: nat;
+   tokenIds: vec nat;
+ };
+type IntentStatusType = 
+ variant {
+   encumbered: opt principal;
+   error: opt text;
+   fulfilled: opt nat;
+   open;
+   pending;
+   settling;
+   withdrawn: opt nat;
+   withdrawn_settling: opt nat;
+ };
+type IntentStatus = 
+ record {
+   current_config: opt vec opt IntentFeature;
+   feature_status: vec opt IntentFeatureStatus;
+   intent_id: nat;
+   original_config: vec opt IntentFeature;
+   owner: Account__1;
+   settled_at: opt record {
+                     principal;
+                     nat;
+                   };
+   status: IntentStatusType;
+ };
+type IntentFilter = 
+ variant {
+   intent_ids: vec nat;
+   listed_tokens: vec TokenSpec;
+   owner_accounts: vec Account__1;
+   owner_principals: vec principal;
+   participant_accounts: vec Account__1;
+   participant_principals: vec principal;
+   satisfying_tokens: vec TokenSpec;
+   statuses: vec IntentStatusType;
+ };
+type IntentFeatureStatus = 
+ variant {
+   actions: vec TokenSpecResult;
+   allow_list: vec principal;
+   escrow: vec Escrow;
+   namespace: text;
+   participants: vec principal;
+ };
+type IntentFeature = 
+ variant {
+   allow_list: vec Account__1;
+   allow_partial;
+   created_at: nat;
+   ending: variant {
+             date: nat;
+             immediate;
+             perpetual;
+             timeout: nat;
+           };
+   intent_tokens: vec Escrow;
+   memo: blob;
+   namespace: text;
+   satisfying_tokens: vec vec TokenSpec;
+   start_date: nat;
+ };
+type InitArgs = record {};
+type InitArgList = 
+ record {
+   expectedExecutionTime: Time;
+   initialTimers: vec record {
+                        ActionId;
+                        Action;
+                      };
+   lastActionIdReported: opt nat;
+   lastCycleReport: opt nat;
+   lastExecutionTime: Time;
+   maxExecutions: opt nat;
+   nextActionId: nat;
+   nextCycleActionId: opt nat;
+ };
+type ICRCStandards = 
+ variant {
+   ICRC1;
+   ICRC2;
+   ICRC37;
+   ICRC4;
+   ICRC7;
+   ICRC80: opt blob;
+ };
+type ICRC8IntentMarketplaceCanister = 
+ service {
+   hello: () -> (text);
+   icrc8_balance_of: (account: opt Account__1, prev: opt Escrow, take:
+    opt nat) -> (vec Escrow) query;
+   icrc8_escrow_account: (escrows: vec Escrow) ->
+    (vec record {
+           account: Account__1;
+           tokens: opt vec TokenSpec;
+         }) query;
+   icrc8_manage_market: (requests: vec opt ManageMarketRequest) ->
+    (vec opt ManageMarketResponse);
+   icrc8_market_info: (filters: opt vec IntentFilter, prev: opt nat, take:
+    opt nat) -> (vec IntentStatus) query;
+   icrc8_metadata: () -> (vec record {
+                                "text": text;
+                                value: Value__1;
+                              }) query;
+   icrc8_supported_tokens: () -> (opt vec TokenSpec) query;
+   icrc8_validate_intents: (ids: vec nat, speculative:
+    vec vec IntentFeature) -> (ValidateIntentsResponse) query;
+   mint_fake_tokens: ("principal": principal, account: Account, amount:
+    nat) -> (TransferResult);
+ };
+type GenericError = 
+ record {
+   error_code: nat;
+   message: text;
+ };
+type Escrow = 
+ record {
+   counterparty: opt Account__1;
+   kind: variant {
+           intent: vec opt TokenSpec;
+           settlement: vec opt TokenSpec;
+         };
+   lock_to_date: opt nat;
+   owner: Account__1;
+   target_intent_id: opt nat;
+ };
+type Balance = nat;
+type ActionResult = 
+ record {
+   actions: vec TokenSpecResult;
+   id: nat;
+ };
+type ActionId = 
+ record {
+   id: nat;
+   time: Time;
+ };
+type Action = 
+ record {
+   aSync: opt nat;
+   actionType: text;
+   params: blob;
+   retries: nat;
+ };
+type Account__1 = 
+ record {
+   owner: principal;
+   subaccount: opt blob;
+ };
+type Account = 
+ record {
+   owner: principal;
+   subaccount: opt Subaccount;
+ };
+service : (args: opt
+                  record {
+                    icrc8intentmarketplaceArgs: opt InitArgs;
+                    ttArgs: opt InitArgList;
+                  }) -> ICRC8IntentMarketplaceCanister
