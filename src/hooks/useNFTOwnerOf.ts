@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Actor } from '@dfinity/agent';
 import { useAnonAgent } from '../provider/AgentProvider';
 import { nft, idlFactory as nftIdl } from '../declarations/nft/index';
@@ -24,15 +24,35 @@ export function useNFTOwnerOf(
   const [error, setError] = useState<any>(null);
   const anonAgent = useAnonAgent();
 
+  // Memoize the options object to prevent unnecessary re-renders
+  const memoizedOptions = useMemo(() => options, [
+    options?.override, 
+    options?.queryArgs
+  ]);
+
   useEffect(() => {
+    // Validate inputs before proceeding
+    if (!canisterId || 
+        canisterId === 'aaaaa-aa' || 
+        canisterId.length < 5 ||
+        !account || 
+        !account.owner || 
+        account.owner === 'aaaaa-aa') {
+      // Set empty results for invalid inputs
+      setTokenIds([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     let cancelled = false;
     async function fetchAll() {
       setLoading(true);
       setError(null);
       // Handle override
-      if (options?.override) {
+      if (memoizedOptions?.override) {
         try {
-          const res = await options.override(canisterId, account, options.queryArgs);
+          const res = await memoizedOptions.override(canisterId, account, memoizedOptions.queryArgs);
           if (!cancelled) setTokenIds(res);
         } catch (e) {
           if (!cancelled) setError(e);
@@ -75,7 +95,7 @@ export function useNFTOwnerOf(
     }
     fetchAll();
     return () => { cancelled = true; };
-  }, [canisterId, account?.owner, account?.subaccount, options?.override, options?.queryArgs, anonAgent]);
+  }, [canisterId, account?.owner, account?.subaccount, memoizedOptions, anonAgent]);
 
   return { tokenIds, loading, error };
 }

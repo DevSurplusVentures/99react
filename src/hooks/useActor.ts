@@ -1,6 +1,7 @@
 import { Actor } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import { useAgent, useAnonAgent, useAuthenticatedAgent } from '../provider/AgentProvider';
+import { useIsAuthenticated } from './useAuth';
 
 /**
  * Hook to retrieve a typed actor for any canister ID and IDL at runtime.
@@ -11,13 +12,24 @@ export function useActor<T>(
   idlFactory: IDL.InterfaceFactory
 ): T {
   const agent = useAgent();
-  const anonAgent = useAnonAgent();
-  
-  // Use authenticated agent if available, otherwise use anonymous agent
-  const selectedAgent = agent || anonAgent;
   
   return Actor.createActor<T>(idlFactory, {
-    agent: selectedAgent,
+    agent,
+    canisterId,
+  });
+}
+
+/**
+ * Hook to retrieve a typed actor for anonymous queries.
+ */
+export function useAnonymousActor<T>(
+  canisterId: string,
+  idlFactory: IDL.InterfaceFactory
+): T {
+  const agent = useAnonAgent();
+  
+  return Actor.createActor<T>(idlFactory, {
+    agent,
     canisterId,
   });
 }
@@ -39,17 +51,22 @@ export function useAuthenticatedActor<T>(
 }
 
 /**
- * Hook to retrieve a typed actor that always uses anonymous agent.
- * Useful for public queries that don't require authentication.
+ * Hook to retrieve a typed actor that safely handles unauthenticated cases.
+ * Returns null if user is not authenticated.
  */
-export function useAnonymousActor<T>(
+export function useSafeAuthenticatedActor<T>(
   canisterId: string,
   idlFactory: IDL.InterfaceFactory
-): T {
-  const anonAgent = useAnonAgent();
+): T | null {
+  const isAuthenticated = useIsAuthenticated();
+  const agent = isAuthenticated ? useAuthenticatedAgent() : null;
+  
+  if (!agent) {
+    return null;
+  }
   
   return Actor.createActor<T>(idlFactory, {
-    agent: anonAgent,
+    agent,
     canisterId,
   });
 }

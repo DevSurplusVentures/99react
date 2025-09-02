@@ -70,8 +70,23 @@ export function useAnonAgent() {
 
 // Hook to get agent for mutations (throws if not authenticated)
 export function useAuthenticatedAgent() {
-  const { agent } = useAgentContext();
+  const { agent, anonAgent, isLocal } = useAgentContext();
+  
+  // Only allow anonymous agent as fallback in Storybook environment
+  // Storybook typically runs on port 6006 or has specific environment variables
+  const isStorybook = typeof window !== 'undefined' && 
+    (window.location.port === '6006' || 
+     window.location.pathname?.startsWith('/__storybook__') ||
+     // Check for Storybook-specific globals
+     (window as any).__STORYBOOK_ADDONS__ ||
+     process.env.STORYBOOK === 'true');
+  
   if (!agent) {
+    if (isStorybook && isLocal) {
+      // Only in Storybook, use anonymous agent as fallback
+      console.warn('Using anonymous agent for Storybook/testing. In production, user must be authenticated.');
+      return anonAgent;
+    }
     throw new Error('User must be authenticated to perform this action');
   }
   return agent;
