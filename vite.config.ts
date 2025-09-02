@@ -38,6 +38,8 @@ export default defineConfig({
     react(),
     environment("all", { prefix: "CANISTER_" }),
     environment("all", { prefix: "DFX_" }),
+    environment("all", { prefix: "ICRC99_" }),
+    environment("all", { prefix: "CYCLES_LEDGER_" }),
     tailwindcss(),
   ],
   resolve: {
