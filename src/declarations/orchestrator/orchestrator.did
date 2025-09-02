@@ -1,0 +1,684 @@
+type ValidationError = 
+ variant {
+   Custom: text;
+   InvalidHex: text;
+ };
+type TimerId = nat;
+type Time = nat;
+type Stats__1 = 
+ record {
+   cycles: nat;
+   expectedExecutionTime: opt Time;
+   lastExecutionTime: Time;
+   maxExecutions: nat;
+   minAction: opt ActionDetail;
+   nextActionId: nat;
+   nextTimer: opt TimerId;
+   timers: nat;
+ };
+type Stats = 
+ record {
+   ckNFTCanisters: vec CkNFTCanisterStateShared;
+   contracts: vec ContractStateShared;
+   networkMap: vec record {
+                     Network;
+                     vec FusionRPCService;
+                   };
+   owner: principal;
+   tt: Stats__1;
+ };
+type SolonaRPCService = variant {Generic: RpcApi;};
+type SendRawTransactionStatus = 
+ variant {
+   InsufficientFunds;
+   NonceTooHigh;
+   NonceTooLow;
+   Ok: opt text;
+ };
+type SendRawTransactionResult = 
+ variant {
+   Err: RpcError;
+   Ok: SendRawTransactionStatus;
+ };
+type RpcServices = 
+ variant {
+   ArbitrumOne: opt vec L2MainnetService;
+   BaseMainnet: opt vec L2MainnetService;
+   Custom: record {
+             chainId: ChainId;
+             services: vec RpcApi;
+           };
+   EthMainnet: opt vec EthMainnetService;
+   EthSepolia: opt vec EthSepoliaService;
+   OptimismMainnet: opt vec L2MainnetService;
+ };
+type RpcService = 
+ variant {
+   ArbitrumOne: L2MainnetService;
+   BaseMainnet: L2MainnetService;
+   Custom: RpcApi;
+   EthMainnet: EthMainnetService;
+   EthSepolia: EthSepoliaService;
+   OptimismMainnet: L2MainnetService;
+   Provider: ProviderId;
+ };
+type RpcError = 
+ variant {
+   HttpOutcallError: HttpOutcallError;
+   JsonRpcError: JsonRpcError;
+   ProviderError: ProviderError;
+   ValidationError: ValidationError;
+ };
+type RpcApi = 
+ record {
+   headers: opt vec HttpHeader;
+   url: text;
+ };
+type RemoteNFTPointer = 
+ record {
+   contract: text;
+   network: Network;
+   tokenId: nat;
+ };
+type RemoteError = 
+ variant {
+   GenericError: text;
+   InsufficientAllowance: record {
+                            nat;
+                            nat;
+                          };
+   InsufficientBalance: record {
+                          nat;
+                          nat;
+                        };
+   InsufficientCycles: record {
+                         nat;
+                         nat;
+                       };
+   NetworkRCPNotFound;
+   NoCkNFTCanister;
+   NotImplemented;
+   RPC:
+    variant {
+      Ethereum: RpcError;
+      EthereumMultiSend: MultiSendRawTransactionResult;
+    };
+   Unauthorized;
+ };
+type RejectionCode = 
+ variant {
+   CanisterError;
+   CanisterReject;
+   DestinationInvalid;
+   NoError;
+   SysFatal;
+   SysTransient;
+   Unknown;
+ };
+type ProviderId = nat64;
+type ProviderError = 
+ variant {
+   InvalidRpcConfig: text;
+   MissingRequiredProvider;
+   NoPermission;
+   ProviderNotFound;
+   TooFewCycles: record {
+                   expected: nat;
+                   received: nat;
+                 };
+ };
+type PropertyShared = 
+ record {
+   immutable: bool;
+   name: text;
+   value: CandyShared;
+ };
+type OrchestratorConfigResult = 
+ variant {
+   Err: OrchestratorConfigError;
+   Ok: nat;
+ };
+type OrchestratorConfigError = 
+ variant {
+   GenericError: text;
+   MapNetwork: variant {
+                 Exists;
+                 NotFound;
+               };
+   Unauthorized;
+ };
+type OrchestratorConfig = 
+ variant {
+   MapNetwork:
+    record {
+      action: variant {
+                Add;
+                Remove;
+              };
+      network: Network;
+      "service": FusionRPCService__1;
+    };
+   SetEthTecdsaKeyName: text;
+   SetSolanaSchnorrKeyName: text;
+ };
+type OrchestratorActor = 
+ service {
+   calc_eth_call_cycles: (RpcServices, nat, text) -> (nat) query;
+   cast: (CastRequest) -> (CastResult);
+   configure: (vec OrchestratorConfig) -> (vec opt OrchestratorConfigResult);
+   create_canister: (ContractPointer, CanisterDefaults, opt Account) ->
+    (CreateCanisterResponse);
+   create_remote: (ContractPointer, Network, nat, nat, nat, opt Account) ->
+    (CreateRemoteResponse);
+   forceCkNFTCaniser: (ContractPointer__1, principal) -> ();
+   get_cast_status: (vec nat) -> (vec opt CastStatus) query;
+   get_ck_nft_canister: (vec ContractPointer) -> (vec opt principal) query;
+   get_creation_cost: (ContractPointer) -> (nat);
+   get_icrc99_address: (principal, Network) -> (opt text);
+   get_mint_cost: (vec MintRequest) -> (vec opt nat) query;
+   get_mint_status: (vec nat) -> (vec opt MintStatus) query;
+   get_remote: (vec record {
+                      principal;
+                      Network__2;
+                    }) -> (vec opt ContractStateShared__1) query;
+   get_remote_approval_address: (ApprovalAddressRequest, opt Account) ->
+    (opt text);
+   get_remote_cost: (ContractPointer, Network) -> (nat) query;
+   get_remote_meta: (vec RemoteNFTPointer, vec nat, opt Account__1) ->
+    (vec opt GetCallResult);
+   get_remote_owner: (vec RemoteNFTPointer, opt Account__1) ->
+    (vec opt GetCallResult);
+   get_remote_status: (vec nat) -> (vec opt ContractStateShared__1) query;
+   get_stats: () -> (Stats) query;
+   mint: (MintRequest, opt Account) -> (MintResult);
+   system_upgrade: () -> ();
+   upgrade_ckNFT_canister: (principal) -> ();
+ };
+type Network__2 = 
+ variant {
+   Bitcoin: opt text;
+   Ethereum: opt nat;
+   IC: opt text;
+   Other: ICRC16Map;
+   Solana: opt nat;
+ };
+type Network__1 = 
+ variant {
+   Bitcoin: opt text;
+   Ethereum: opt nat;
+   IC: opt text;
+   Other: ICRC16Map;
+   Solana: opt nat;
+ };
+type Network = 
+ variant {
+   Bitcoin: opt text;
+   Ethereum: opt nat;
+   IC: opt text;
+   Other: ICRC16Map;
+   Solana: opt nat;
+ };
+type MultiSendRawTransactionResult = 
+ variant {
+   Consistent: SendRawTransactionResult;
+   Inconsistent: vec record {
+                       RpcService;
+                       SendRawTransactionResult;
+                     };
+ };
+type MintStatus = 
+ variant {
+   CheckingOwner: record {
+                    nextQuery: nat;
+                    retries: nat;
+                  };
+   Complete:
+    record {
+      approvalError: opt text;
+      approvalTrx: opt nat;
+      mintTrx: nat;
+    };
+   Err:
+    variant {
+      ApprovalError: text;
+      GenericError: text;
+      InvalidMetadata: text;
+      InvalidTransfer: text;
+      MetadataError: text;
+      MintError: text;
+      OwnershipNotVerified:
+       variant {
+         InvalidOwner;
+         RemoteError: RemoteError;
+         TooManyRetries: nat;
+       };
+    };
+   Minting;
+   RetrievingMetadata: record {
+                         nextQuery: nat;
+                         retries: nat;
+                       };
+   Transferring;
+ };
+type MintResumeOption = 
+ variant {
+   StartMetadataTransfer;
+   StartMint;
+   StartOwnershipVerification;
+ };
+type MintResult = 
+ variant {
+   Err: MintError;
+   Ok: MintRequestId;
+ };
+type MintRequestId = nat;
+type MintRequest = 
+ record {
+   mintToAccount: Account;
+   nft: RemoteNFTPointer;
+   resume: opt record {
+                 nat;
+                 MintResumeOption;
+               };
+   spender: opt Account;
+ };
+type MintError = 
+ variant {
+   GenericError: text;
+   InsufficientAllowance: record {
+                            nat;
+                            nat;
+                          };
+   InsufficientBalance: record {
+                          nat;
+                          nat;
+                        };
+   InsufficientCycles: record {
+                         nat;
+                         nat;
+                       };
+   InvalidAccount;
+   InvalidMintRequest;
+   InvalidMintRequestId;
+   InvalidMintStatus;
+   InvalidRemoteNFTPointer;
+   InvalidResumeOption;
+   InvalidSpender;
+   NetworkRCPNotFound;
+   NoCkNFTCanister;
+   NotImplemented;
+   RPC:
+    variant {
+      Ethereum: RpcError;
+      EthereumMultiSend: MultiSendRawTransactionResult;
+    };
+   Unauthorized;
+ };
+type L2MainnetService = 
+ variant {
+   Alchemy;
+   Ankr;
+   BlockPi;
+   Llama;
+   PublicNode;
+ };
+type JsonRpcError = 
+ record {
+   code: int64;
+   message: text;
+ };
+type ICRPCService = variant {Generic: RpcApi;};
+type ICRC16Map = 
+ vec record {
+       text;
+       CandyShared;
+     };
+type HttpOutcallError = 
+ variant {
+   IcError: record {
+              code: RejectionCode;
+              message: text;
+            };
+   InvalidHttpJsonRpcResponse:
+    record {
+      body: text;
+      parsingError: opt text;
+      status: nat16;
+    };
+ };
+type HttpHeader = 
+ record {
+   name: text;
+   value: text;
+ };
+type GetCallResult = 
+ variant {
+   Err: RemoteError;
+   Ok: text;
+ };
+type FusionRPCService__1 = 
+ variant {
+   Bitcoin: record {
+              canisterId: principal;
+              rpc: BitcoinRPCService;
+            };
+   Ethereum: record {
+               canisterId: principal;
+               rpc: RpcService;
+             };
+   IC: record {
+         canisterId: principal;
+         rpc: ICRPCService;
+       };
+   Other: vec record {
+                text;
+                CandyShared;
+              };
+   Solana: record {
+             canisterId: principal;
+             rpc: SolonaRPCService;
+           };
+ };
+type FusionRPCService = 
+ variant {
+   Bitcoin: record {
+              canisterId: principal;
+              rpc: BitcoinRPCService;
+            };
+   Ethereum: record {
+               canisterId: principal;
+               rpc: RpcService;
+             };
+   IC: record {
+         canisterId: principal;
+         rpc: ICRPCService;
+       };
+   Other: vec record {
+                text;
+                CandyShared;
+              };
+   Solana: record {
+             canisterId: principal;
+             rpc: SolonaRPCService;
+           };
+ };
+type EthSepoliaService = 
+ variant {
+   Alchemy;
+   Ankr;
+   BlockPi;
+   PublicNode;
+   Sepolia;
+ };
+type EthMainnetService = 
+ variant {
+   Alchemy;
+   Ankr;
+   BlockPi;
+   Cloudflare;
+   Llama;
+   PublicNode;
+ };
+type CreateRemoteResponse = 
+ variant {
+   Err: CreateRemoteError;
+   Ok: nat;
+ };
+type CreateRemoteError = 
+ variant {
+   GenericError: text;
+   InsufficientAllowance: record {
+                            nat;
+                            nat;
+                          };
+   InsufficientBalance: record {
+                          nat;
+                          nat;
+                        };
+   InsufficientCycles: record {
+                         nat;
+                         nat;
+                       };
+   NetworkRCPNotFound;
+   NoCkNFTCanister;
+   NotImplemented;
+   RPC:
+    variant {
+      Ethereum: RpcError;
+      EthereumMultiSend: MultiSendRawTransactionResult;
+    };
+   Unauthorized;
+ };
+type CreateCanisterResponse = 
+ variant {
+   Err: CreateCanisterError;
+   Ok: principal;
+ };
+type CreateCanisterError = 
+ variant {
+   GenericError: text;
+   InsufficientAllowance: record {
+                            nat;
+                            nat;
+                          };
+   InsufficientBalance: record {
+                          nat;
+                          nat;
+                        };
+   InsufficientCycles: record {
+                         nat;
+                         nat;
+                       };
+   NetworkRCPNotFound;
+   NoCkNFTCanister;
+   NotImplemented;
+   RPC:
+    variant {
+      Ethereum: RpcError;
+      EthereumMultiSend: MultiSendRawTransactionResult;
+    };
+   Unauthorized;
+ };
+type ContractStateShared__1 = 
+ record {
+   address: opt text;
+   ckNFTCanisterId: opt nat;
+   confirmed: bool;
+   contractId: nat;
+   contractType: variant {
+                   Owned: ContractPointer;
+                   Remote;
+                 };
+   deploymentTrx: opt text;
+   network: opt Network;
+   nextQuery: opt nat;
+   retries: opt nat;
+   writingContractCanisterId: opt text;
+ };
+type ContractStateShared = 
+ record {
+   address: opt text;
+   ckNFTCanisterId: opt nat;
+   confirmed: bool;
+   contractId: nat;
+   contractType: variant {
+                   Owned: ContractPointer;
+                   Remote;
+                 };
+   deploymentTrx: opt text;
+   network: opt Network;
+   nextQuery: opt nat;
+   retries: opt nat;
+   writingContractCanisterId: opt text;
+ };
+type ContractPointer__1 = 
+ record {
+   contract: text;
+   network: Network;
+ };
+type ContractPointer = 
+ record {
+   contract: text;
+   network: Network;
+ };
+type Contract = text;
+type CkNFTCanisterStateShared = 
+ record {
+   ckNFTCanisterId: nat;
+   lastCycles: nat;
+   lastCyclesTimestamp: nat;
+   nativeContract: Contract;
+   network: Network__1;
+   networkMap: vec record {
+                     Network__1;
+                     Contract;
+                   };
+   "principal": principal;
+ };
+type ChainId = nat64;
+type CastStatus = 
+ variant {
+   Completed: nat;
+   Created;
+   Error: CastError;
+   RemoteFinalized: text;
+   SubmittedToOrchestrator: record {
+                              localCastId: nat;
+                              remoteCastId: nat;
+                            };
+   SubmittingToOrchestrator: nat;
+   WaitingOnContract: record {transaction: text;};
+   WaitingOnMint: record {transaction: text;};
+   WaitingOnTransfer: record {transaction: text;};
+ };
+type CastResult = 
+ variant {
+   Err: CastError;
+   Ok: nat;
+ };
+type CastRequest = 
+ record {
+   castId: nat;
+   created_at_time: opt nat;
+   gasLimit: opt nat;
+   gasPrice: opt nat;
+   maxPriorityFeePerGas: opt nat;
+   memo: opt blob;
+   nativeContract: ContractPointer;
+   originalCaller: Account;
+   originalMinterAccount: opt Account;
+   remoteContract: ContractPointer;
+   targetOwner: text;
+   tokenId: nat;
+   uri: text;
+ };
+type CastError = 
+ variant {
+   ContractNotVerified: variant {
+                          NoConsensus;
+                          TooManyRetries: nat;
+                        };
+   ExistingCast: nat;
+   GenericError: text;
+   InsufficientAllowance: record {
+                            nat;
+                            nat;
+                          };
+   InsufficientBalance: record {
+                          nat;
+                          nat;
+                        };
+   InsufficientCycles: record {
+                         nat;
+                         nat;
+                       };
+   InvalidContract;
+   InvalidTransaction: text;
+   MintNotVerified: variant {
+                      NoConsensus;
+                      TooManyRetries: nat;
+                    };
+   NetworkError: text;
+   NoCkNFTCanister;
+   NotFound;
+   TransferNotVerified: variant {
+                          NoConsensus;
+                          TooManyRetries: nat;
+                        };
+   Unauthorized;
+ };
+type CanisterDefaults = 
+ record {
+   description: opt text;
+   logo: opt text;
+   name: opt text;
+   symbol: opt text;
+ };
+type CandyShared = 
+ variant {
+   Array: vec CandyShared;
+   Blob: blob;
+   Bool: bool;
+   Bytes: vec nat8;
+   Class: vec PropertyShared;
+   Float: float64;
+   Floats: vec float64;
+   Int: int;
+   Int16: int16;
+   Int32: int32;
+   Int64: int64;
+   Int8: int8;
+   Ints: vec int;
+   Map: vec record {
+              text;
+              CandyShared;
+            };
+   Nat: nat;
+   Nat16: nat16;
+   Nat32: nat32;
+   Nat64: nat64;
+   Nat8: nat8;
+   Nats: vec nat;
+   Option: opt CandyShared;
+   Principal: principal;
+   Set: vec CandyShared;
+   Text: text;
+   ValueMap: vec record {
+                   CandyShared;
+                   CandyShared;
+                 };
+ };
+type BitcoinRPCService = variant {Generic: RpcApi;};
+type ApprovalAddressRequest = 
+ record {
+   account: Account;
+   remoteNFTPointer: RemoteNFTPointer;
+ };
+type ActionId = 
+ record {
+   id: nat;
+   time: Time;
+ };
+type ActionDetail = 
+ record {
+   ActionId;
+   Action;
+ };
+type Action = 
+ record {
+   aSync: opt nat;
+   actionType: text;
+   params: blob;
+   retries: nat;
+ };
+type Account__1 = 
+ record {
+   owner: principal;
+   subaccount: opt blob;
+ };
+type Account = 
+ record {
+   owner: principal;
+   subaccount: opt blob;
+ };
+service : () -> OrchestratorActor
