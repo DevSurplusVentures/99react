@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as BridgeRouteImport } from './routes/bridge'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Collection_detailCanisterIdRouteImport } from './routes/collection_detail/$canisterId'
 
+const BridgeRoute = BridgeRouteImport.update({
+  id: '/bridge',
+  path: '/bridge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -33,35 +39,46 @@ const Collection_detailCanisterIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bridge': typeof BridgeRoute
   '/collection_detail/$canisterId': typeof Collection_detailCanisterIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bridge': typeof BridgeRoute
   '/collection_detail/$canisterId': typeof Collection_detailCanisterIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bridge': typeof BridgeRoute
   '/collection_detail/$canisterId': typeof Collection_detailCanisterIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/collection_detail/$canisterId'
+  fullPaths: '/' | '/about' | '/bridge' | '/collection_detail/$canisterId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/collection_detail/$canisterId'
-  id: '__root__' | '/' | '/about' | '/collection_detail/$canisterId'
+  to: '/' | '/about' | '/bridge' | '/collection_detail/$canisterId'
+  id: '__root__' | '/' | '/about' | '/bridge' | '/collection_detail/$canisterId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  BridgeRoute: typeof BridgeRoute
   Collection_detailCanisterIdRoute: typeof Collection_detailCanisterIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/bridge': {
+      id: '/bridge'
+      path: '/bridge'
+      fullPath: '/bridge'
+      preLoaderRoute: typeof BridgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -89,6 +106,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  BridgeRoute: BridgeRoute,
   Collection_detailCanisterIdRoute: Collection_detailCanisterIdRoute,
 }
 export const routeTree = rootRouteImport

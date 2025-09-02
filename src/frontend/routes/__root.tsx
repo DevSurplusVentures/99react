@@ -3,8 +3,7 @@ import viteLogo from "../assets/vite.svg";
 import icLogo from "../assets/ic.svg";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import GithubLink from "@/components/github-link";
-import { useIdentity, useAuth } from "@nfid/identitykit/react";
+import { useAuth } from "@nfid/identitykit/react";
 
 function TopBarIdentity() {
   //const identity = useIdentity();
@@ -83,11 +82,7 @@ export const Route = createRootRoute({
             <img src={reactLogo} alt="React logo" className="h-20" />
           </a>
         </div>
-        <h1>ICP Starter</h1>
-        <h2 className="text-center">
-          React + TypeScript + Vite + Tailwind + Shadcn/UI + Tanstack
-          Query/Router
-        </h2>
+        
         <TopBarIdentity />
         <div className="flex gap-5 text-white items-center">
           <Link to="/" className="hover:text-white/70">
@@ -96,7 +91,9 @@ export const Route = createRootRoute({
           <Link to="/about" className="hover:text-white/70">
             /about
           </Link>
-          <GithubLink />
+          <Link to="/bridge" className="hover:text-white/70">
+            /bridge
+          </Link>
         </div>
         <Outlet />
         <TanStackRouterDevtools />

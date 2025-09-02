@@ -82,11 +82,22 @@ export async function parseNFTMetadata(tokenId: bigint, metadata: [string, Value
 
 
   for (const entry of allMetadata){
-    console.log("Processing metadata entry:", entry, entry[0], entry[0][0], entry[0][0] =="icrc97:metadata");
-    if(entry[0][0] === "icrc97:metadata" || entry[0][0] === "icrc97:metadata_v1") {
-      const key = entry[0][0];
-      const value = entry[0][1];
-
+    console.log("Processing metadata entry:", entry, "structure:", {
+      isArray: Array.isArray(entry),
+      length: entry?.length,
+      firstElement: entry?.[0],
+      secondElement: entry?.[1],
+      entryType: typeof entry?.[0],
+      entryValue: typeof entry?.[1]
+    });
+    
+    // Handle both array and non-array entry formats
+    const key = Array.isArray(entry) && entry.length > 0 ? entry[0] : entry;
+    const value = Array.isArray(entry) && entry.length > 1 ? entry[1] : undefined;
+    
+    console.log("Extracted key:", key, "value:", value);
+    
+    if(key === "icrc97:metadata" || key === "icrc97:metadata_v1" || key === "icrc97:external_metadata") {
         //this is an icrc97 metadata entry
         //find the first parsable or discoverable value
         console.log("Parsing metadata for tokenId:", tokenId, "key:", key, "value:", value);
