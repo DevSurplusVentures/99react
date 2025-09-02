@@ -193,10 +193,14 @@ function MarketListingPriceContent({ price, tokenCanisterIdStr, isAuthenticated,
   onLogin?: () => void;
   isConnecting?: boolean;
 }) {
-  const { symbol, decimals, loading, error } = useFungibleToken(tokenCanisterIdStr);
+  const tokenInfo = useFungibleToken(tokenCanisterIdStr);
+  const { data, isLoading, error } = tokenInfo;
 
-  if (loading) return <span className="text-gray-400">Loading price...</span>;
+  if (isLoading) return <span className="text-gray-400">Loading price...</span>;
   if (error) return <span className="text-red-500">Error loading token info</span>;
+  if (!data) return <span className="text-gray-400">No token info</span>;
+
+  const { symbol, decimals } = data;
 
   const displayPrice = decimals != null ? Number(price) / 10 ** decimals : price.toString();
 
@@ -255,8 +259,7 @@ function AuthenticatedMarketListingPrice({ price, tokenCanisterIdStr, marketCani
     try {
       // 1. Approve the market canister to spend the price
       // Ensure fee is properly converted to BigInt
-      const feeAmount = fee !== null && fee !== undefined ? 
-        (typeof fee === 'bigint' ? fee : BigInt(fee.toString())) : 0n;
+      const feeAmount = fee || 0n;
       
       const approveArgs = {
         from_subaccount: [],
@@ -376,13 +379,16 @@ function AuthenticatedMarketListingPrice({ price, tokenCanisterIdStr, marketCani
     }
   };
 
-  const { symbol, decimals, loading, error, fee } = useFungibleToken(tokenCanisterIdStr);
+  const tokenInfo = useFungibleToken(tokenCanisterIdStr);
+  const { data: tokenData, isLoading: tokenLoading, error: tokenError } = tokenInfo;
 
   const isLoading = approveToken.status === 'pending' || manageMarket.status === 'pending';
 
-  if (loading) return <span className="text-gray-400">Loading price...</span>;
-  if (error) return <span className="text-red-500">Error loading token info</span>;
+  if (tokenLoading) return <span className="text-gray-400">Loading price...</span>;
+  if (tokenError) return <span className="text-red-500">Error loading token info</span>;
+  if (!tokenData) return <span className="text-gray-400">No token info</span>;
 
+  const { symbol, decimals, fee } = tokenData;
   const displayPrice = decimals != null ? Number(price) / 10 ** decimals : price.toString();
 
   return (
