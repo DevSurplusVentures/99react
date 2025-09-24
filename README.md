@@ -8,7 +8,7 @@
 
 [![MIT License][license-shield]](LICENSE)
 
-![](./media/screenshot.png)
+
 
 ### Frontend
 
