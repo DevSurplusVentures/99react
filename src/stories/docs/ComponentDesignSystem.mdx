@@ -1,0 +1,392 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Documentation/Component Design System" />
+
+# Component Design System
+
+## Design Philosophy
+
+The 99React design system is built on principles of consistency, accessibility, and modularity. Every component follows established patterns to ensure a cohesive user experience across the entire application.
+
+## Design Tokens
+
+### Color Palette
+
+#### Primary Colors
+- **Primary Blue**: `#3B82F6` - Main action buttons, links, active states
+- **Primary Dark**: `#1E40AF` - Hover states, pressed buttons
+- **Primary Light**: `#DBEAFE` - Backgrounds, subtle highlights
+
+#### Semantic Colors
+- **Success Green**: `#10B981` - Success messages, positive actions
+- **Warning Yellow**: `#F59E0B` - Warnings, pending states
+- **Error Red**: `#EF4444` - Error messages, destructive actions
+- **Info Blue**: `#3B82F6` - Information, neutral messages
+
+#### Neutral Colors
+- **Gray 50**: `#F9FAFB` - Light backgrounds
+- **Gray 100**: `#F3F4F6` - Card backgrounds
+- **Gray 200**: `#E5E7EB` - Borders, dividers
+- **Gray 500**: `#6B7280` - Secondary text
+- **Gray 900**: `#111827` - Primary text
+
+### Typography Scale
+
+#### Font Families
+- **Primary**: `Inter, system-ui, sans-serif` - UI text
+- **Mono**: `'JetBrains Mono', monospace` - Code, addresses
+
+#### Font Sizes
+- **xs**: `0.75rem` (12px) - Small labels, captions
+- **sm**: `0.875rem` (14px) - Body text, descriptions
+- **base**: `1rem` (16px) - Default body text
+- **lg**: `1.125rem` (18px) - Large body text
+- **xl**: `1.25rem` (20px) - Small headings
+- **2xl**: `1.5rem` (24px) - Section headings
+- **3xl**: `1.875rem` (30px) - Page headings
+
+#### Font Weights
+- **normal**: `400` - Body text
+- **medium**: `500` - Emphasized text
+- **semibold**: `600` - Headings, labels
+- **bold**: `700` - Strong emphasis
+
+### Spacing System
+
+Based on 8px grid system:
+- **1**: `0.25rem` (4px)
+- **2**: `0.5rem` (8px)
+- **3**: `0.75rem` (12px)
+- **4**: `1rem` (16px)
+- **6**: `1.5rem` (24px)
+- **8**: `2rem` (32px)
+- **12**: `3rem` (48px)
+- **16**: `4rem` (64px)
+
+### Border Radius
+- **sm**: `0.125rem` (2px) - Small elements
+- **base**: `0.25rem` (4px) - Standard radius
+- **md**: `0.375rem` (6px) - Cards, inputs
+- **lg**: `0.5rem` (8px) - Modals, large cards
+- **xl**: `0.75rem` (12px) - Hero sections
+- **full**: `9999px` - Circular elements
+
+## Component Categories
+
+### 1. Foundation Components
+
+#### Button Component
+**Variants:**
+- `primary` - Main actions (blue background)
+- `secondary` - Secondary actions (gray border)
+- `ghost` - Subtle actions (no background)
+- `destructive` - Dangerous actions (red background)
+
+**Sizes:**
+- `sm` - Small buttons (32px height)
+- `md` - Default buttons (40px height)
+- `lg` - Large buttons (48px height)
+
+**States:**
+- Default, hover, active, disabled, loading
+
+#### Input Component
+**Types:**
+- Text input, password, email, number
+- Textarea for multi-line input
+- Select for dropdown options
+- File upload with drag-and-drop
+
+**States:**
+- Default, focus, error, disabled, readonly
+
+#### Card Component
+**Variants:**
+- `default` - Standard card with shadow
+- `elevated` - Increased shadow for emphasis
+- `outlined` - Border instead of shadow
+- `ghost` - Minimal styling
+
+### 2. Navigation Components
+
+#### Navigation Bar
+- Logo placement and branding
+- Main navigation links
+- User authentication controls
+- Responsive mobile menu
+
+#### Breadcrumbs
+- Path indication for deep navigation
+- Interactive navigation elements
+- Overflow handling for long paths
+
+#### Sidebar Navigation
+- Collapsible menu structure
+- Active state indication
+- Nested navigation support
+- Icon and text combinations
+
+### 3. Data Display Components
+
+#### NFT Card
+**Information Hierarchy:**
+1. NFT image/media (primary focus)
+2. NFT name and collection
+3. Price and marketplace data
+4. Action buttons (view, buy, bid)
+
+**States:**
+- Loading skeleton
+- Error state with retry option
+- Empty state placeholder
+- Interactive hover effects
+
+#### Collection List
+**Display Modes:**
+- Grid view for visual browsing
+- List view for detailed information
+- Compact view for dense listings
+
+**Filtering & Sorting:**
+- Category filters
+- Price range filtering
+- Sort by date, price, popularity
+- Search functionality
+
+#### Market Listing Price
+**Display Formats:**
+- Native token display (ICP, ETH, SOL)
+- USD equivalent pricing
+- Price change indicators
+- Historical price data
+
+### 4. Form Components
+
+#### Form Layout
+- Consistent field spacing
+- Label positioning (top, side)
+- Field grouping and sections
+- Error message positioning
+
+#### Validation Patterns
+- Real-time validation
+- Error state styling
+- Success confirmation
+- Help text and guidance
+
+#### Form Controls
+- Checkbox and radio groups
+- Toggle switches
+- Range sliders
+- Date/time pickers
+
+### 5. Feedback Components
+
+#### Loading States
+**Patterns:**
+- Skeleton loaders for content
+- Spinner loaders for actions
+- Progress bars for operations
+- Shimmer effects for images
+
+#### Error States
+**Types:**
+- Inline field errors
+- Form submission errors
+- Page-level error boundaries
+- Network connection errors
+
+#### Success States
+- Toast notifications
+- Inline success messages
+- Confirmation modals
+- Progress completion
+
+### 6. Overlay Components
+
+#### Modal Component
+**Sizes:**
+- `sm` - 400px max width
+- `md` - 600px max width
+- `lg` - 800px max width
+- `xl` - 1000px max width
+- `full` - Full screen on mobile
+
+**Types:**
+- Confirmation dialogs
+- Form modals
+- Image galleries
+- Multi-step wizards
+
+#### Dropdown Menu
+- Action menus
+- User account menus
+- Filter and sort options
+- Context menus
+
+#### Tooltip Component
+- Hover information
+- Help text display
+- Keyboard navigation
+- Mobile touch support
+
+## Component Composition Patterns
+
+### Provider Pattern
+All major features use provider composition:
+
+```jsx
+<FeatureProvider>
+  <ErrorBoundary>
+    <LoadingBoundary>
+      <FeatureComponent />
+    </LoadingBoundary>
+  </ErrorBoundary>
+</FeatureProvider>
+```
+
+### Compound Components
+Complex components use compound pattern:
+
+```jsx
+<Card>
+  <Card.Header>
+    <Card.Title>NFT Details</Card.Title>
+    <Card.Actions>
+      <Button>Edit</Button>
+    </Card.Actions>
+  </Card.Header>
+  <Card.Body>
+    <Card.Content />
+  </Card.Body>
+  <Card.Footer>
+    <Card.Actions />
+  </Card.Footer>
+</Card>
+```
+
+### Render Props Pattern
+For flexible component behavior:
+
+```jsx
+<DataProvider>
+  {({ data, loading, error }) => (
+    <div>
+      {loading && <div className="py-8 text-center text-gray-500 animate-pulse">Loading data...</div>}
+      {error && <div className="py-8 text-center text-red-500">Error: {error}</div>}
+      {data && <DataDisplay data={data} />}
+    </div>
+  )}
+</DataProvider>
+```
+
+## Responsive Design Principles
+
+### Breakpoint System
+- **sm**: `640px` - Small tablets, large phones
+- **md**: `768px` - Tablets
+- **lg**: `1024px` - Small desktops
+- **xl**: `1280px` - Large desktops
+- **2xl**: `1536px` - Extra large screens
+
+### Mobile-First Approach
+All components are designed mobile-first:
+1. Start with mobile layout
+2. Progressively enhance for larger screens
+3. Ensure touch-friendly interactions
+4. Optimize for thumb navigation
+
+### Responsive Patterns
+- **Collapsible Navigation** - Hamburger menu on mobile
+- **Stacked to Side-by-Side** - Form layouts
+- **Grid to List** - Collection displays
+- **Hidden to Visible** - Secondary information
+- **Compact to Expanded** - Card layouts
+
+## Accessibility Standards
+
+### WCAG Compliance
+All components meet WCAG 2.1 AA standards:
+- **Perceivable** - Text alternatives, color contrast
+- **Operable** - Keyboard navigation, focus management
+- **Understandable** - Clear language, consistent navigation
+- **Robust** - Compatible with assistive technologies
+
+### Focus Management
+- Visible focus indicators
+- Logical tab order
+- Focus trapping in modals
+- Skip links for main content
+
+### Screen Reader Support
+- Semantic HTML elements
+- ARIA labels and descriptions
+- Live regions for dynamic content
+- Proper heading hierarchy
+
+### Color and Contrast
+- Minimum 4.5:1 contrast for normal text
+- Minimum 3:1 contrast for large text
+- Color not sole indicator of meaning
+- High contrast mode support
+
+## Animation and Transitions
+
+### Motion Principles
+- **Purposeful** - Animations serve a function
+- **Natural** - Based on real-world physics
+- **Respectful** - Honors reduced motion preferences
+- **Performant** - 60fps smooth animations
+
+### Transition Standards
+- **Duration**: 150-300ms for most transitions
+- **Easing**: `ease-out` for entrances, `ease-in` for exits
+- **Properties**: Transform and opacity preferred
+- **Reduced Motion**: Respect user preferences
+
+### Common Animations
+- **Fade In/Out** - Content appearance/disappearance
+- **Slide In/Out** - Drawer and modal transitions
+- **Scale** - Button press feedback
+- **Shake** - Form validation errors
+- **Skeleton Loading** - Content loading states
+
+## Component Testing Standards
+
+### Visual Testing
+- Storybook stories for all variants
+- Visual regression testing
+- Cross-browser compatibility
+- Responsive breakpoint testing
+
+### Interaction Testing
+- Keyboard navigation
+- Mouse interactions
+- Touch gestures
+- Focus management
+
+### Accessibility Testing
+- Screen reader compatibility
+- Color contrast validation
+- Keyboard-only navigation
+- ARIA attribute verification
+
+## Documentation Standards
+
+### Storybook Stories
+Every component includes:
+- **Default** - Basic usage example
+- **Variants** - All available variations
+- **States** - Loading, error, empty states
+- **Interactive** - Controls for testing
+- **Accessibility** - A11y testing integration
+
+### Code Documentation
+- TypeScript interfaces for all props
+- JSDoc comments for complex functions
+- Usage examples in component files
+- Migration guides for breaking changes
+
+---
+
+This design system ensures consistency, accessibility, and maintainability across all components in the 99React application.

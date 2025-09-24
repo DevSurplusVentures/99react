@@ -1,0 +1,756 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Documentation/Hook Usage Patterns" />
+
+# Hook Usage Patterns
+
+## Hook Architecture Overview
+
+99React uses a comprehensive set of custom hooks to encapsulate business logic, manage state, and provide reusable functionality across components. This document outlines the patterns and best practices for using these hooks effectively.
+
+## Hook Categories
+
+### 1. Authentication Hooks
+
+#### useAuth Hook
+**Purpose**: Manages user authentication state and provides login/logout functionality.
+
+**Usage Pattern**:
+```typescript
+function MyComponent() {
+  const { 
+    isAuthenticated, 
+    user, 
+    login, 
+    logout, 
+    isLoading,
+    error 
+  } = useAuth();
+
+  if (isLoading) return <div className="py-8 text-center text-gray-500 animate-pulse">Loading...</div>;
+  if (error) return <div className="py-8 text-center text-red-500">Error: {error}</div>;
+  if (!isAuthenticated) return <div className="py-8 text-center">Please log in to continue</div>;
+
+  return <AuthenticatedContent user={user} />;
+}
+```
+
+**Best Practices**:
+- Always handle loading and error states
+- Use early returns for different auth states
+- Wrap components requiring auth with auth checks
+
+#### useActor Hook
+**Purpose**: Provides authenticated IC actor instances for canister communication.
+
+**Usage Pattern**:
+```typescript
+function CanisterInteraction() {
+  const { actor, isConnected, error } = useActor('nft_canister');
+
+  const handleMintNFT = async () => {
+    if (!actor) return;
+    
+    try {
+      const result = await actor.mint_nft({
+        to: user.principal,
+        metadata: nftData
+      });
+      // Handle success
+    } catch (error) {
+      // Handle error
+    }
+  };
+
+  return (
+    <Button 
+      onClick={handleMintNFT}
+      disabled={!isConnected}
+    >
+      Mint NFT
+    </Button>
+  );
+}
+```
+
+**Best Practices**:
+- Check actor availability before making calls
+- Handle canister errors gracefully
+- Use TypeScript for actor interface typing
+
+### 2. NFT Management Hooks
+
+#### useNFTCollection Hook
+**Purpose**: Fetches and manages NFT collection data with caching and pagination.
+
+**Usage Pattern**:
+```typescript
+function NFTCollectionDisplay() {
+  const { 
+    data: nfts, 
+    isLoading, 
+    error, 
+    fetchNextPage,
+    hasNextPage,
+    refetch
+  } = useNFTCollection({
+    collectionId: 'collection_123',
+    pageSize: 20
+  });
+
+  if (isLoading) return <div className="py-8 text-center text-gray-500 animate-pulse">Loading collection...</div>;
+  if (error) return <div className="py-8 text-center text-red-500">Failed to load collection metadata.</div>;
+  if (!nfts?.length) return <div className="py-8 text-center text-gray-400">No NFTs found</div>;
+
+  return (
+    <CollectionNFTList 
+      canisterId={collectionId}
+      tokenIds={nfts.map(nft => nft.tokenId)}
+      loading={isLoading}
+      error={error}
+    />
+  );
+}
+```
+
+**Best Practices**:
+- Use infinite scrolling for large collections
+- Implement proper error boundaries
+- Cache collection data appropriately
+- Handle empty states gracefully
+
+#### useNFTMetadata Hook
+**Purpose**: Fetches detailed NFT metadata with IPFS resolution.
+
+**Usage Pattern**:
+```typescript
+function NFTDetailView({ tokenId }) {
+  const { 
+    data: metadata, 
+    isLoading, 
+    error 
+  } = useNFTMetadata(tokenId);
+
+  const {
+    name,
+    description,
+    image,
+    attributes,
+    animation_url
+  } = metadata || {};
+
+  return (
+    <Card>
+      <Card.Header>
+        {isLoading ? (
+          <Skeleton height="24px" width="200px" />
+        ) : (
+          <Card.Title>{name}</Card.Title>
+        )}
+      </Card.Header>
+      <Card.Body>
+        {error ? (
+          <ErrorMessage error={error} />
+        ) : (
+          <>
+            <NFTMedia 
+              image={image} 
+              animation={animation_url}
+              loading={isLoading}
+            />
+            <NFTAttributes 
+              attributes={attributes}
+              loading={isLoading}
+            />
+          </>
+        )}
+      </Card.Body>
+    </Card>
+  );
+}
+```
+
+**Best Practices**:
+- Handle IPFS loading delays
+- Provide fallback for missing metadata
+- Use skeleton loading for better UX
+- Cache metadata to reduce requests
+
+#### useNFTOwner Hook
+**Purpose**: Manages NFT ownership queries and batch operations.
+
+**Usage Pattern**:
+```typescript
+function NFTOwnershipBadge({ tokenIds }) {
+  const { user } = useAuth();
+  const { 
+    data: ownershipMap, 
+    isLoading 
+  } = useNFTOwner(tokenIds);
+
+  const ownedTokens = useMemo(() => 
+    tokenIds.filter(id => ownershipMap?.[id] === user?.principal),
+    [tokenIds, ownershipMap, user]
+  );
+
+  if (isLoading) return <Badge variant="ghost">Checking...</Badge>;
+
+  return (
+    <Badge variant={ownedTokens.length > 0 ? "success" : "secondary"}>
+      {ownedTokens.length > 0 ? "Owned" : "Not Owned"}
+    </Badge>
+  );
+}
+```
+
+**Best Practices**:
+- Batch ownership queries for efficiency
+- Use memoization for computed values
+- Handle ownership changes in real-time
+- Provide visual ownership indicators
+
+### 3. Bridge Operation Hooks
+
+#### use99Mutations Hook
+**Purpose**: Manages ICRC-99 bridge operations with transaction tracking.
+
+**Usage Pattern**:
+```typescript
+function BridgeOperationWizard() {
+  const {
+    initiateBridge,
+    monitorBridge,
+    finalizeBridge,
+    isLoading,
+    error,
+    progress
+  } = use99Mutations();
+
+  const [bridgeId, setBridgeId] = useState(null);
+
+  const handleBridgeStart = async (bridgeParams) => {
+    try {
+      const result = await initiateBridge(bridgeParams);
+      setBridgeId(result.bridge_id);
+      
+      // Start monitoring
+      monitorBridge(result.bridge_id, {
+        onProgress: (status) => {
+          // Update progress UI
+        },
+        onComplete: (result) => {
+          // Handle completion
+        },
+        onError: (error) => {
+          // Handle error
+        }
+      });
+    } catch (error) {
+      // Handle initiation error
+    }
+  };
+
+  return (
+    <EVMExportWizard
+      onSubmit={handleBridgeStart}
+      isLoading={isLoading}
+      error={error}
+      progress={progress}
+    />
+  );
+}
+```
+
+**Best Practices**:
+- Always monitor bridge operations
+- Provide detailed progress feedback
+- Handle partial failures gracefully
+- Store bridge state for recovery
+
+#### useICRC99Support Hook
+**Purpose**: Checks bridge support for different chains and tokens.
+
+**Usage Pattern**:
+```typescript
+function BridgeChainSelector() {
+  const { 
+    data: supportedChains,
+    isLoading,
+    checkSupport
+  } = useICRC99Support();
+
+  const [selectedChain, setSelectedChain] = useState(null);
+  const [tokenSupport, setTokenSupport] = useState(null);
+
+  const handleChainSelect = async (chainId) => {
+    setSelectedChain(chainId);
+    const support = await checkSupport({
+      sourceChain: chainId,
+      targetChain: 'ic'
+    });
+    setTokenSupport(support);
+  };
+
+  if (isLoading) return <ChainSelectorSkeleton />;
+
+  return (
+    <ChainSelector
+      chains={supportedChains}
+      selectedChain={selectedChain}
+      onChainSelect={handleChainSelect}
+      tokenSupport={tokenSupport}
+    />
+  );
+}
+```
+
+**Best Practices**:
+- Cache support information
+- Check support before operations
+- Provide clear support indicators
+- Handle unsupported scenarios
+
+### 4. Market Operation Hooks
+
+#### useMarketListingNFT Hook
+**Purpose**: Manages NFT marketplace listings with real-time updates.
+
+**Usage Pattern**:
+```typescript
+function MarketplaceListings() {
+  const {
+    data: listings,
+    isLoading,
+    error,
+    filters,
+    setFilters,
+    sortBy,
+    setSortBy,
+    refetch
+  } = useMarketListingNFT({
+    collection: selectedCollection,
+    priceRange: [0, 1000],
+    status: 'active'
+  });
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  const handleSort = (criteria) => {
+    setSortBy(criteria);
+  };
+
+  return (
+    <div>
+      <MarketplaceFilters
+        filters={filters}
+        onChange={handleFilterChange}
+        onSort={handleSort}
+      />
+      
+      {isLoading ? (
+        <div className="py-8 text-center text-gray-500 animate-pulse">Loading listings...</div>
+      ) : error ? (
+        <div className="py-8 text-center text-red-500">
+          Error loading listings. 
+          <button onClick={refetch} className="ml-2 underline">Try again</button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {listings.map(listing => (
+            <div key={listing.id} className="border rounded p-4">
+              {/* Listing content */}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+**Best Practices**:
+- Implement real-time price updates
+- Use optimistic updates for better UX
+- Handle listing expiration
+- Provide comprehensive filtering
+
+#### useMarketMutations Hook
+**Purpose**: Handles marketplace transactions (buy, sell, bid).
+
+**Usage Pattern**:
+```typescript
+function NFTPurchaseButton({ listing }) {
+  const { user } = useAuth();
+  const {
+    purchaseNFT,
+    isLoading,
+    error
+  } = useMarketMutations();
+
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const handlePurchase = async () => {
+    try {
+      const result = await purchaseNFT({
+        listingId: listing.id,
+        price: listing.price,
+        buyer: user.principal
+      });
+      
+      // Success handling
+      toast.success('NFT purchased successfully!');
+      router.push(`/nft/${result.tokenId}`);
+    } catch (error) {
+      toast.error(`Purchase failed: ${error.message}`);
+    }
+  };
+
+  const canPurchase = user && 
+    user.principal !== listing.seller &&
+    user.balance >= listing.price;
+
+  return (
+    <>
+      <Button
+        onClick={() => setShowConfirmation(true)}
+        disabled={!canPurchase || isLoading}
+        loading={isLoading}
+      >
+        {isLoading ? 'Processing...' : `Buy for ${listing.price} ICP`}
+      </Button>
+
+      <PurchaseConfirmationModal
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        onConfirm={handlePurchase}
+        listing={listing}
+      />
+    </>
+  );
+}
+```
+
+**Best Practices**:
+- Always confirm expensive operations
+- Check user balance before transactions
+- Provide clear transaction feedback
+- Handle failed transactions gracefully
+
+### 5. Utility Hooks
+
+#### useCyclesLedger Hook
+**Purpose**: Manages canister cycle balance and funding operations.
+
+**Usage Pattern**:
+```typescript
+function CycleManager() {
+  const {
+    balance,
+    isLoading,
+    fundCanister,
+    checkBalance,
+    isLowBalance
+  } = useCyclesLedger();
+
+  const handleFunding = async (amount) => {
+    try {
+      await fundCanister({
+        canisterId: 'canister_123',
+        cycles: amount
+      });
+      toast.success('Canister funded successfully');
+      await checkBalance();
+    } catch (error) {
+      toast.error(`Funding failed: ${error.message}`);
+    }
+  };
+
+  return (
+    <Card>
+      <Card.Header>
+        <Card.Title>Cycle Balance</Card.Title>
+        {isLowBalance && (
+          <Badge variant="warning">Low Balance</Badge>
+        )}
+      </Card.Header>
+      <Card.Body>
+        <div className="text-2xl font-bold">
+          {isLoading ? (
+            <Skeleton width="100px" />
+          ) : (
+            `${balance?.toLocaleString()} cycles`
+          )}
+        </div>
+        <FundingControls onFund={handleFunding} />
+      </Card.Body>
+    </Card>
+  );
+}
+```
+
+**Best Practices**:
+- Monitor cycles regularly
+- Alert on low balance
+- Batch funding operations
+- Track funding history
+
+#### useFungibleToken Hook
+**Purpose**: Manages ICRC-1/ICRC-2 token operations.
+
+**Usage Pattern**:
+```typescript
+function TokenTransfer() {
+  const {
+    balance,
+    transfer,
+    approve,
+    allowance,
+    isLoading,
+    error
+  } = useFungibleToken('token_canister_id');
+
+  const [recipient, setRecipient] = useState('');
+  const [amount, setAmount] = useState('');
+
+  const handleTransfer = async () => {
+    if (!recipient || !amount) return;
+
+    try {
+      const result = await transfer({
+        to: recipient,
+        amount: parseFloat(amount)
+      });
+      
+      toast.success('Transfer successful');
+      setRecipient('');
+      setAmount('');
+    } catch (error) {
+      toast.error(`Transfer failed: ${error.message}`);
+    }
+  };
+
+  const canTransfer = parseFloat(amount) <= balance && 
+    parseFloat(amount) > 0;
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); handleTransfer(); }}>
+      <Input
+        label="Recipient"
+        value={recipient}
+        onChange={setRecipient}
+        placeholder="Principal ID"
+        required
+      />
+      <Input
+        label="Amount"
+        type="number"
+        value={amount}
+        onChange={setAmount}
+        max={balance}
+        placeholder="0.00"
+        required
+      />
+      <Button
+        type="submit"
+        disabled={!canTransfer || isLoading}
+        loading={isLoading}
+      >
+        Transfer
+      </Button>
+    </form>
+  );
+}
+```
+
+**Best Practices**:
+- Validate amounts against balance
+- Use proper decimal handling
+- Provide transaction receipts
+- Handle token standards consistently
+
+## Common Hook Patterns
+
+### 1. Error Handling Pattern
+```typescript
+function useErrorHandling() {
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const execute = async (operation) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await operation();
+      return result;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { error, isLoading, execute };
+}
+```
+
+### 2. Optimistic Updates Pattern
+```typescript
+function useOptimisticUpdate() {
+  const queryClient = useQueryClient();
+
+  const mutate = useMutation({
+    mutationFn: updateFunction,
+    onMutate: async (newData) => {
+      // Cancel queries
+      await queryClient.cancelQueries(['key']);
+      
+      // Snapshot previous value
+      const previousData = queryClient.getQueryData(['key']);
+      
+      // Optimistically update
+      queryClient.setQueryData(['key'], newData);
+      
+      // Return context for rollback
+      return { previousData };
+    },
+    onError: (err, newData, context) => {
+      // Rollback on error
+      queryClient.setQueryData(['key'], context.previousData);
+    },
+    onSettled: () => {
+      // Refetch after settled
+      queryClient.invalidateQueries(['key']);
+    }
+  });
+
+  return mutate;
+}
+```
+
+### 3. Real-time Updates Pattern
+```typescript
+function useRealtimeData(key) {
+  const queryClient = useQueryClient();
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const ws = new WebSocket(`wss://api.example.com/${key}`);
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      queryClient.setQueryData([key], data);
+    };
+
+    setSocket(ws);
+    
+    return () => {
+      ws.close();
+    };
+  }, [key, queryClient]);
+
+  return socket;
+}
+```
+
+## Testing Hook Patterns
+
+### Unit Testing Hooks
+```typescript
+import { renderHook, act } from '@testing-library/react';
+import { useAuth } from './useAuth';
+
+describe('useAuth', () => {
+  test('should handle login flow', async () => {
+    const { result } = renderHook(() => useAuth());
+
+    expect(result.current.isAuthenticated).toBe(false);
+
+    await act(async () => {
+      await result.current.login('test@example.com');
+    });
+
+    expect(result.current.isAuthenticated).toBe(true);
+  });
+
+  test('should handle logout', async () => {
+    const { result } = renderHook(() => useAuth());
+
+    // Setup authenticated state
+    await act(async () => {
+      await result.current.login('test@example.com');
+    });
+
+    await act(async () => {
+      result.current.logout();
+    });
+
+    expect(result.current.isAuthenticated).toBe(false);
+  });
+});
+```
+
+### Integration Testing
+```typescript
+import { render, screen } from '@testing-library/react';
+import { TestProviders } from '../test-utils';
+import MyComponent from './MyComponent';
+
+test('component uses hooks correctly', async () => {
+  render(
+    <TestProviders>
+      <MyComponent />
+    </TestProviders>
+  );
+
+  // Test hook integration
+  expect(screen.getByText('Loading...')).toBeInTheDocument();
+  
+  await waitFor(() => {
+    expect(screen.getByText('Data loaded')).toBeInTheDocument();
+  });
+});
+```
+
+## Performance Optimization
+
+### Memoization Patterns
+```typescript
+function useOptimizedHook(dependencies) {
+  const memoizedValue = useMemo(() => {
+    return expensiveCalculation(dependencies);
+  }, [dependencies]);
+
+  const memoizedCallback = useCallback((param) => {
+    return memoizedValue.process(param);
+  }, [memoizedValue]);
+
+  return { memoizedValue, memoizedCallback };
+}
+```
+
+### Debouncing Pattern
+```typescript
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+```
+
+---
+
+These hook usage patterns provide a foundation for building robust, maintainable React applications with proper state management, error handling, and user experience considerations.
