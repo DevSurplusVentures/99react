@@ -79,6 +79,39 @@ const NFTCollectionHookProvider = ({ children }: { children: React.ReactNode }) 
 export default {
   title: 'NFT/CollectionExplorer',
   component: CollectionExplorer,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `
+## CollectionExplorer Component
+
+Browse and discover NFT collections with advanced filtering and sorting capabilities.
+
+### Features
+- **Collection Discovery**: Browse available NFT collections across multiple canisters
+- **Search and Filter**: Find collections by name, creator, or collection traits
+- **Sort Options**: Sort by volume, floor price, recent activity, or alphabetically
+- **Collection Previews**: Quick overview cards with key statistics and sample NFTs
+- **Responsive Grid**: Adaptive layout that works across different screen sizes
+- **Loading States**: Smooth loading experiences with skeleton placeholders
+
+### Use Cases
+- NFT marketplace collection browsing and discovery
+- Portfolio collection management and exploration
+- Market research and analysis tools
+- Collection comparison and selection interfaces
+        `,
+      },
+    },
+  },
+  argTypes: {
+    canisters: {
+      control: 'object',
+      description: 'Array of canister IDs to explore collections from'
+    }
+  },
   decorators: [
     (Story) => (
       <NFTCollectionHookProvider>

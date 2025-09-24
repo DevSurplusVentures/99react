@@ -139,6 +139,46 @@ const CollectionNFTListStory = () => {
 export default {
   title: 'NFT/CollectionNFTList',
   component: CollectionNFTListStory,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `
+## CollectionNFTList Component
+
+Displays a filterable and sortable list of NFTs within a collection with pagination.
+
+### Features
+- **NFT Grid Display**: Responsive grid layout for NFT items with customizable sizing
+- **Advanced Filtering**: Filter by traits, price range, rarity, and custom attributes
+- **Multiple Sort Options**: Sort by price, rarity, token ID, recent activity, and metadata
+- **Pagination**: Efficient loading and navigation for large collections
+- **Selection Mode**: Multi-select functionality for batch operations
+- **Quick Actions**: Buy, list, transfer, and bridge NFTs directly from the list
+- **Search Functionality**: Text-based search across NFT metadata
+
+### Use Cases
+- Collection browsing and exploration
+- NFT marketplace collection listings
+- Portfolio management and organization
+- Bulk operations (bridge, transfer, list multiple NFTs)
+- Market analysis and trait research
+        `,
+      },
+    },
+  },
+  argTypes: {
+    canisterId: {
+      control: 'text',
+      description: 'The canister ID of the collection to display NFTs from'
+    },
+    pageSize: {
+      control: { type: 'select' },
+      options: [6, 12, 24, 48],
+      description: 'Number of NFTs to display per page'
+    }
+  },
 } as Meta<typeof CollectionNFTListStory>;
 
 export const Default: StoryObj<typeof CollectionNFTListStory> = {

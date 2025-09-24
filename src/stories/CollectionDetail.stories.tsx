@@ -53,6 +53,38 @@ const NFTCollectionHookProvider = ({ children }: { children: React.ReactNode }) 
 export default {
   component: CollectionDetail,
   title: 'NFT/CollectionDetail',
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `
+## CollectionDetail Component
+
+Detailed view of an NFT collection showing statistics, metadata, and individual NFTs.
+
+### Features
+- **Collection Statistics**: Total supply, floor price, volume metrics
+- **NFT Gallery**: Grid view of collection NFTs with pagination
+- **Trait Filtering**: Filter NFTs by attributes and properties
+- **Collection Metadata**: Name, description, creator information
+- **Market Integration**: Buy/sell functionality for listed NFTs
+
+### Use Cases
+- Collection exploration and discovery
+- NFT marketplace collection pages
+- Portfolio collection management
+- Trait-based NFT filtering and search
+        `,
+      },
+    },
+  },
+  argTypes: {
+    canisterId: {
+      control: 'text',
+      description: 'The canister ID of the NFT collection to display'
+    }
+  },
   decorators: [
     (Story) => (
       <NFTCollectionHookProvider>

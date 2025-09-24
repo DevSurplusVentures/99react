@@ -86,9 +86,46 @@ function mockUseNFTMetadata(variant: "icrc97" | "string" | "array" | "loading" |
 export default {
   title: "NFT/NFTCard",
   component: NFTCard,
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: `
+## NFTCard Component
+
+A versatile NFT card component that displays NFT metadata, images, and interactive features.
+
+### Features
+- **ICRC97 Metadata Support**: Automatic parsing and display of ICRC97 metadata standards
+- **Responsive Design**: Adapts to different screen sizes and container widths
+- **Loading States**: Skeleton loading for better UX during data fetching
+- **Error Handling**: Graceful degradation when metadata fails to load
+- **Interactive Features**: Click handlers, selection states, and hover effects
+- **Trait Display**: Supports attribute/trait visualization from metadata
+
+### Use Cases
+- Collection listings and galleries
+- NFT marketplace displays
+- User portfolio views
+- Selection interfaces for bridging/trading
+        `,
+      },
+    },
+  },
   argTypes: {
-    canisterId: { control: "text" },
-    tokenId: { control: "number" },
+    canisterId: { 
+      control: "text",
+      description: "The canister ID of the NFT collection"
+    },
+    tokenId: { 
+      control: "number",
+      description: "The token ID of the specific NFT"
+    },
+    variant: {
+      control: { type: "select" },
+      options: ["icrc97", "string", "array", "loading", "error"],
+      description: "Mock variant for testing different metadata states"
+    }
   },
 };
 
