@@ -748,7 +748,7 @@ export function ReturnCostStep({
           <p className="text-gray-600 mb-4">{error}</p>
           
           {/* Show network troubleshooting tips for connectivity issues */}
-          {(error.includes('ERR_INSUFFICIENT_RESOURCES') || error.includes('Failed to fetch') || error.includes('Network connectivity')) && (
+          {(error && (error.includes('ERR_INSUFFICIENT_RESOURCES') || error.includes('Failed to fetch') || error.includes('Network connectivity'))) && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-left">
               <h5 className="font-medium text-yellow-800 mb-2">Network Troubleshooting:</h5>
               <ul className="text-sm text-yellow-700 space-y-1 list-disc list-inside">
