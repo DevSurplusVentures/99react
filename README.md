@@ -1,32 +1,16 @@
-# ICP + React + TypeScript + Vite + Tailwind + Shadcn/UI + Tanstack Query/Router
+# 99React
 
-This template provides a batteries included setup for an ICP/React application with the latest versions of Vite, TypeScript, Tailwind CSS, Shadcn/UI, SWC, Eslint and Tanstack Query/Router.
 
-> [!TIP]
-> Fork this repository as a starting point for your next ICP project.
->
-> Live demo: <https://upacy-bqaaa-aaaal-qr7qa-cai.icp0.io>
+> [!NOTE]
+> **📚 Comprehensive Storybook Documentation Available**
+> 
+> This project includes extensive Storybook documentation covering components, hooks, bridge flows, and architecture patterns. See the [Storybook Documentation](#storybook-documentation) section below for setup and navigation instructions.
 
-> [!TIP]
-> This template is also available in a version using [ic-reactor](https://www.npmjs.com/package/@ic-reactor/react) instead of Tanstack Query. Check out that version from the [ic-reactor branch](https://github.com/kristoferlund/ic-vite-react-next/tree/ic-reactor).
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]](LICENSE)
 
 ![](./media/screenshot.png)
 
-## Features
-
-### Backend
-
-The Rust based backend exposes one endpoint only, the `greet` function that returns a greeting message.
-
 ### Frontend
-
-The React/Vite/TS based frontend allows the user to input a name and click a button to fetch the greeting message from the backend.
 
 Dependencies:
 
@@ -99,40 +83,116 @@ During development, you can run the frontend with hot reloading using Vite.
 pnpm run dev
 ```
 
-## Contributors
+## Storybook Documentation
 
-<!-- readme: collaborators,contributors -start -->
-<table>
-	<tbody>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/kristoferlund">
-                    <img src="https://avatars.githubusercontent.com/u/9698363?v=4" width="100;" alt="kristoferlund"/>
-                    <br />
-                    <sub><b>Kristofer</b></sub>
-                </a>
-            </td>
-		</tr>
-	<tbody>
-</table>
-<!-- readme: collaborators,contributors -end -->
+This project includes comprehensive Storybook documentation covering all components, hooks, architecture patterns, and bridge flows.
 
-## License
+### 🚀 Quick Start
 
-This project is licensed under the MIT License. See the LICENSE file for more
-details.
+**Run Storybook in development mode:**
+```bash
+pnpm run storybook
+```
+This will start Storybook at `http://localhost:6006`
 
-## Contributing
+**Build Storybook for production:**
+```bash
+pnpm run build-storybook
+```
+This generates a static build in the `storybook-static/` directory.
 
-Contributions are welcome! Please open an issue or submit a pull request if you
-have any suggestions or improvements.
+### 📖 Documentation Structure
 
-[contributors-shield]: https://img.shields.io/github/contributors/kristoferlund/ic-vite-react-next.svg?style=for-the-badge
-[contributors-url]: https://github.com/kristoferlund/ic-vite-react-next/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/kristoferlund/ic-vite-react-next.svg?style=for-the-badge
-[forks-url]: https://github.com/kristoferlund/ic-vite-react-next/network/members
-[stars-shield]: https://img.shields.io/github/stars/kristoferlund/ic-vite-react-next?style=for-the-badge
-[stars-url]: https://github.com/kristoferlund/ic-vite-react-next/stargazers
-[issues-shield]: https://img.shields.io/github/issues/kristoferlund/ic-vite-react-next.svg?style=for-the-badge
-[issues-url]: https://github.com/kristoferlund/ic-vite-react-next/issues
-[license-shield]: https://img.shields.io/github/license/kristoferlund/ic-vite-react-next.svg?style=for-the-badge
+The Storybook documentation is organized into the following sections:
+
+#### 🏗️ **System Documentation**
+- **Architecture Overview** - System architecture, data flow, and component patterns
+- **Component Design System** - Design tokens, composition patterns, and UI guidelines  
+- **Hook Usage Patterns** - Comprehensive hook documentation with real-world examples
+- **Bridge Flow Documentation** - Complete bridge system workflows and testing strategies
+
+#### 🧩 **Component Stories**
+- **UI Components** - Basic UI building blocks (Button, Card, etc.)
+- **NFT Components** - NFT-specific components (NFTCard, CollectionDetail, etc.)
+- **Bridge Components** - Cross-chain bridge wizards and steps
+- **Market Components** - Marketplace and trading components
+
+#### 🪝 **Hook Stories**
+- **Authentication Hooks** - User authentication and identity management
+- **NFT Hooks** - NFT metadata, collections, and ownership
+- **Bridge Hooks** - Cross-chain bridging functionality
+- **Market Hooks** - Marketplace operations and pricing
+- **Utility Hooks** - Helper hooks and common patterns
+
+### 🧭 Navigation Guide
+
+#### **Getting Started**
+1. **Start with Architecture** (`Docs > Architecture`) - Understand the overall system design
+2. **Review Component Patterns** (`Docs > Component Design System`) - Learn design principles
+3. **Explore Hook Patterns** (`Docs > Hook Usage Patterns`) - See real implementation examples
+
+#### **Component Development**
+- Browse `Components` section for interactive component examples
+- Each component story includes:
+  - **Usage examples** with live previews
+  - **Props documentation** with interactive controls
+  - **Design variants** (loading, error, success states)
+  - **Real data integration** examples
+
+#### **Hook Development**  
+- Explore `Hooks` section for comprehensive hook documentation
+- Features include:
+  - **Live hook examples** with actual API calls
+  - **Error handling patterns** 
+  - **Loading state management**
+  - **Integration examples** showing hook composition
+
+#### **Bridge System**
+- Review `Docs > Bridge Flow Documentation` for complete bridge workflows
+- Check bridge component stories for step-by-step wizards
+- Test different bridge scenarios (Export, Import, Burn, Return)
+
+### 🔧 Development Workflow
+
+**For Component Development:**
+1. Run `pnpm run storybook`
+2. Navigate to your component's story
+3. Use the interactive controls to test different props
+4. Check all variant states (loading, error, success)
+5. Verify responsive behavior using viewport controls
+
+**For Hook Development:**
+1. Check existing hook patterns in `Hooks` stories
+2. Review similar hooks for implementation patterns
+3. Test error scenarios using story variants
+4. Verify integration with provider patterns
+
+**For Bridge Development:**
+1. Start with `Docs > Bridge Flow Documentation`
+2. Review relevant bridge component stories
+3. Test complete workflows end-to-end
+4. Verify error handling and edge cases
+
+### 📱 Key Features
+
+- **Live Component Preview** - Interactive component testing with real props
+- **Real Data Integration** - Stories use actual API calls and data
+- **Responsive Testing** - Built-in viewport controls for mobile/desktop testing
+- **Error Scenario Testing** - Stories include error states and edge cases
+- **Documentation-First** - Comprehensive guides for system understanding
+- **Search Functionality** - Quickly find components, hooks, or documentation
+
+### 🎯 Best Practices
+
+- **Always check Storybook first** when working with existing components
+- **Update stories** when adding new component variants or props  
+- **Test all states** - success, loading, error, and edge cases
+- **Use story variants** to document different use cases
+- **Follow naming conventions** established in existing stories
+
+### 🔗 Useful Links
+- **Local Storybook**: `http://localhost:6006` (when running)
+- **Architecture Docs**: Navigate to `Docs > Architecture` in Storybook
+- **Component Patterns**: `Docs > Component Design System`
+- **Hook Examples**: `Docs > Hook Usage Patterns`
+
