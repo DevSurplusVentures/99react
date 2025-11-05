@@ -155,7 +155,7 @@ export function use99Mutations(orchestratorCanisterId: string) {
                     const { Actor, HttpAgent } = await import('@dfinity/agent');
                     
                     const agent = new HttpAgent({
-                      host: process.env.DFX_NETWORK === 'local' ? 'http://localhost:8080' : 'https://ic0.app',
+                      host: process.env.DFX_NETWORK === 'local' ? 'http://localhost:8080' : 'https://icp0.io',
                     });
                     
                     if (process.env.DFX_NETWORK === 'local') {
@@ -490,7 +490,7 @@ export function use99Mutations(orchestratorCanisterId: string) {
                 const { Actor, HttpAgent } = await import('@dfinity/agent');
                 
                 const agent = new HttpAgent({
-                  host: process.env.DFX_NETWORK === 'local' ? 'http://localhost:8080' : 'https://ic0.app',
+                  host: process.env.DFX_NETWORK === 'local' ? 'http://localhost:8080' : 'https://icp0.io',
                 });
                 
                 if (process.env.DFX_NETWORK === 'local') {
@@ -681,7 +681,7 @@ export function use99Mutations(orchestratorCanisterId: string) {
         // Create new anonymous agent if needed
         const { HttpAgent } = await import('@dfinity/agent');
         agent = new HttpAgent({ 
-          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://ic0.app' 
+          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://icp0.io' 
         });
         
         // Fetch root key for local development
@@ -764,9 +764,13 @@ export function use99Mutations(orchestratorCanisterId: string) {
         });
       } else {
         // Fallback to provided parameters or defaults
-        finalGasPrice = params.gasPrice || 50000000000n; // 50 gwei default
-        finalGasLimit = params.gasLimit || 2000000n; // 2M gas default
-        finalMaxPriorityFeePerGas = params.maxPriorityFeePerGas || 2000000000n; // 2 gwei default
+        // NOTE: For Solana, gasPrice/gasLimit have different semantics:
+        //   - gasPrice = computeUnitPrice (micro-lamports per compute unit, 0-50000 typical)
+        //   - gasLimit = computeUnitLimit (max compute units, 200000-300000 typical)
+        // We must use ?? (nullish coalescing) instead of || to allow 0 values
+        finalGasPrice = params.gasPrice ?? 50000000000n; // 50 gwei default (EVM) or 0 (Solana None)
+        finalGasLimit = params.gasLimit ?? 2000000n; // 2M gas default (EVM) or 200K (Solana)
+        finalMaxPriorityFeePerGas = params.maxPriorityFeePerGas ?? 2000000000n; // 2 gwei default (EVM) or 0 (Solana)
         
         console.log('⚠️ Using fallback gas parameters - enhanced calculation data not available');
       }
@@ -795,6 +799,40 @@ export function use99Mutations(orchestratorCanisterId: string) {
   });
 
   /**
+   * Get the status of remote contract deployments
+   */
+  const getRemoteStatus = useMutation({
+    mutationFn: async (remoteIds: bigint[]): Promise<Array<{
+      contractId: bigint;
+      address?: string;
+      confirmed: boolean;
+      deploymentTrx?: string;
+      network?: Network;
+    } | null>> => {
+      // Use anonymous actor since this is a query-like call
+      if (!anonymousActor) {
+        throw new Error('Anonymous actor not available');
+      }
+
+      const result = await anonymousActor.get_remote_status(remoteIds);
+      
+      return result.map(status => {
+        if (status && status.length > 0 && status[0]) {
+          const s = status[0];
+          return {
+            contractId: s.contractId,
+            address: s.address && s.address.length > 0 ? s.address[0] : undefined,
+            confirmed: s.confirmed,
+            deploymentTrx: s.deploymentTrx && s.deploymentTrx.length > 0 ? s.deploymentTrx[0] : undefined,
+            network: s.network && s.network.length > 0 ? s.network[0] : undefined,
+          };
+        }
+        return null;
+      });
+    },
+  });
+
+  /**
    * Get the cost of creating a remote contract
    */
   const getRemoteCost = useMutation({
@@ -802,10 +840,48 @@ export function use99Mutations(orchestratorCanisterId: string) {
       pointer: ContractPointer;
       network: Network;
     }): Promise<bigint> => {
-      if (!actor) {
-        throw new Error('User must be authenticated to get remote cost');
+      // Use anonymous actor since this is a query call
+      if (!anonymousActor) {
+        throw new Error('Anonymous actor not available');
       }
-      return actor.get_remote_cost(params.pointer, params.network);
+      return anonymousActor.get_remote_cost(params.pointer, params.network);
+    },
+  });
+
+  /**
+   * Get the remote approval address for funding remote operations
+   * This returns the orchestrator's address on the remote chain where it needs funds
+   * to perform operations like collection deployment and NFT minting.
+   * 
+   * For Solana: Returns the Ed25519-derived address where SOL is needed
+   * For Ethereum: Returns the ECDSA-derived address where ETH is needed
+   */
+  const getRemoteApprovalAddress = useMutation({
+    mutationFn: async (params: {
+      contract: string;
+      network: Network;
+      tokenId: bigint;
+      account: Account;
+    }): Promise<string | null> => {
+      // Use anonymous actor since this is a query call
+      if (!anonymousActor) {
+        throw new Error('Anonymous actor not available');
+      }
+      
+      const result = await anonymousActor.get_remote_approval_address(
+        {
+          remoteNFTPointer: {
+            contract: params.contract,
+            network: params.network,
+            tokenId: params.tokenId,
+          },
+          account: params.account,
+        },
+        []
+      );
+      
+      // Result is opt text, so either [text] or []
+      return result && result.length > 0 && result[0] ? result[0] : null;
     },
   });
 
@@ -996,6 +1072,52 @@ export function use99Mutations(orchestratorCanisterId: string) {
   });
 
   /**
+   * Get the approval address that needs funding for re-export (cast) operations
+   * Returns the address where an NFT is held after burn-back to IC
+   * Returns null if the NFT hasn't been burned back (fresh export)
+   * Uses anonymous agent since this is a query operation
+   */
+  const getCastFundAddress = useMutation({
+    mutationFn: async (params: {
+      ckNFTCanisterId: Principal;
+      tokenId: bigint;
+    }): Promise<{ address: string; network: Network } | null> => {
+      const { Actor, HttpAgent } = await import('@dfinity/agent');
+      const { idlFactory } = await import('../declarations/ckNFT');
+      
+      // Use anonymous agent for query operations - no authentication needed
+      let agent = anonymousActor ? (anonymousActor as any)._agent || (anonymousActor as any).__agent : null;
+      
+      if (!agent) {
+        // Create new anonymous agent if needed
+        agent = new HttpAgent({ 
+          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://icp0.io' 
+        });
+        
+        // Fetch root key for local development
+        if (process.env.NODE_ENV === 'development') {
+          await agent.fetchRootKey();
+        }
+      }
+
+      // Create actor for the specific ckNFT canister
+      const ckNFTActor = Actor.createActor(idlFactory, {
+        agent,
+        canisterId: params.ckNFTCanisterId,
+      });
+
+      const result = await (ckNFTActor as any).icrc99_cast_fund_address(params.tokenId);
+      
+      // Result is [] | [[string, Network]]
+      if (Array.isArray(result) && result.length > 0) {
+        const [address, network] = result[0];
+        return { address, network };
+      }
+      return null;
+    },
+  });
+
+  /**
    * Get cast cost from ckNFT canister - the real cost calculation function
    */
   const getCastCost = useMutation({
@@ -1014,7 +1136,7 @@ export function use99Mutations(orchestratorCanisterId: string) {
         // Create new anonymous agent if needed
         const { HttpAgent } = await import('@dfinity/agent');
         agent = new HttpAgent({ 
-          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://ic0.app' 
+          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://icp0.io' 
         });
         
         // Fetch root key for local development
@@ -1057,7 +1179,7 @@ export function use99Mutations(orchestratorCanisterId: string) {
         // Create new anonymous agent if needed
         const { HttpAgent } = await import('@dfinity/agent');
         agent = new HttpAgent({ 
-          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://ic0.app' 
+          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://icp0.io' 
         });
         
         // Fetch root key for local development
@@ -1099,6 +1221,7 @@ export function use99Mutations(orchestratorCanisterId: string) {
     getApprovalAddress.isPending ||
     getCkNFTCanister.isPending ||
     getICRC99Address.isPending ||
+    getCastFundAddress.isPending ||
     getCastCost.isPending;
 
   const error = 
@@ -1116,6 +1239,7 @@ export function use99Mutations(orchestratorCanisterId: string) {
     getApprovalAddress.error ||
     getCkNFTCanister.error ||
     getICRC99Address.error ||
+    getCastFundAddress.error ||
     getCastCost.error;
 
   return {
@@ -1131,8 +1255,11 @@ export function use99Mutations(orchestratorCanisterId: string) {
     castToEVM,
     getCastStatus,
     getCastCost, // Real cast cost calculation
+    getCastFundAddress, // Get approval address for re-export funding
     createRemoteContract,
     getRemoteCost,
+    getRemoteStatus,
+    getRemoteApprovalAddress,
     
     // Burn operations
     getBurnFundingAddress,
@@ -1364,7 +1491,7 @@ export function createCastRequest(
 export const NetworkHelpers = {
   ethereum: (chainId?: bigint): Network => ({ Ethereum: chainId ? [chainId] : [] }),
   ic: (subnet?: string): Network => ({ IC: subnet ? [subnet] : [] }),
-  solana: (cluster?: bigint): Network => ({ Solana: cluster ? [cluster] : [] }),
+  solana: (cluster?: { 'Mainnet': null } | { 'Testnet': null } | { 'Devnet': null } | { 'Custom': string }): Network => ({ Solana: cluster ? [cluster] : [] }),
   bitcoin: (network?: string): Network => ({ Bitcoin: network ? [network] : [] }),
   other: (config: Array<[string, any]>): Network => ({ Other: config }),
 };

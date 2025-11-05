@@ -3,7 +3,7 @@ import { Actor } from '@dfinity/agent';
 import { useAnonAgent } from '../provider/AgentProvider';
 import { idlFactory as ckNFTIdl } from '../declarations/ckNFT/index';
 import type { _SERVICE as CkNFTService } from '../declarations/ckNFT/ckNFT.did';
-import type { RemoteContractPointer__1 } from '../declarations/ckNFT/ckNFT.did';
+import type { RemoteContractPointer } from '../declarations/ckNFT/ckNFT.did';
 
 /**
  * Hook to fetch the native chain information for a ckNFT
@@ -14,11 +14,11 @@ export function useNativeChain(
   canisterId: string,
   tokenId?: bigint
 ): { 
-  nativeChain: RemoteContractPointer__1 | null; 
+  nativeChain: RemoteContractPointer | null; 
   loading: boolean; 
   error: any 
 } {
-  const [nativeChain, setNativeChain] = useState<RemoteContractPointer__1 | null>(null);
+  const [nativeChain, setNativeChain] = useState<RemoteContractPointer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
   const anonAgent = useAnonAgent();

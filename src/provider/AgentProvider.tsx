@@ -26,7 +26,7 @@ export function AgentProvider({
   // Detect local vs. mainnet
   const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
   const network: AgentNetwork = networkProp || (isLocal ? 'local' : 'ic');
-  const host = network === 'ic' ? 'https://ic0.app' : network === 'testnet' ? 'https://testnet.dfinity.network' : 'http://localhost:8080';
+  const host = network === 'ic' ? 'https://icp0.io' : network === 'testnet' ? 'https://testnet.dfinity.network' : 'http://localhost:8080';
 
   // Get authenticated agent from IdentityKit (undefined if not connected)
   const agent = useIdentityKitAgent({ host });
@@ -70,7 +70,7 @@ export function useAnonAgent() {
 
 // Hook to get agent for mutations (throws if not authenticated)
 export function useAuthenticatedAgent() {
-  const { agent, anonAgent, isLocal } = useAgentContext();
+  const { agent, anonAgent } = useAgentContext();
   
   // Only allow anonymous agent as fallback in Storybook environment
   // Storybook typically runs on port 6006 or has specific environment variables
@@ -82,8 +82,8 @@ export function useAuthenticatedAgent() {
      process.env.STORYBOOK === 'true');
   
   if (!agent) {
-    if (isStorybook && isLocal) {
-      // Only in Storybook, use anonymous agent as fallback
+    if (isStorybook) {
+      // In Storybook, always use anonymous agent as fallback for preview/testing
       console.warn('Using anonymous agent for Storybook/testing. In production, user must be authenticated.');
       return anonAgent;
     }

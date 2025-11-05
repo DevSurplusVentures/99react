@@ -32,7 +32,7 @@ export function ICProvider<Map extends Record<string, CanisterConfig>>({
       new HttpAgent({
         host:
           config.network === 'ic'
-            ? 'https://ic0.app'
+            ? 'https://icp0.io'
             : 'https://testnet.dfinity.network',
       }),
     [config.network]

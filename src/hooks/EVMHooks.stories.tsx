@@ -120,9 +120,18 @@ export const MetaMaskNotDetected: Story = {
   },
   decorators: [
     (Story) => {
-      // Mock window.ethereum to be undefined
+      // Mock window.ethereum to be undefined for this story
+      // Store original reference (but don't try to serialize it)
       const originalEthereum = (window as any).ethereum;
       (window as any).ethereum = undefined;
+      
+      // Restore on unmount
+      if (typeof window !== 'undefined') {
+        // Use a timeout to restore after render
+        setTimeout(() => {
+          (window as any).ethereum = originalEthereum;
+        }, 0);
+      }
       
       return (
         <div>
@@ -130,16 +139,6 @@ export const MetaMaskNotDetected: Story = {
             <strong>Simulated:</strong> MetaMask not detected
           </div>
           <Story />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                // Restore original ethereum object after story
-                setTimeout(() => {
-                  window.ethereum = ${JSON.stringify(originalEthereum)};
-                }, 100);
-              `,
-            }}
-          />
         </div>
       );
     },

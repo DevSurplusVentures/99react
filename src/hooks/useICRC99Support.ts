@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { Principal } from '@dfinity/principal';
-import type { ContractPointer } from '../declarations/orchestrator/orchestrator.did';
+import type { ContractPointer, SolanaCluster } from '../declarations/orchestrator/orchestrator.did';
 
 export interface ICRC99SupportResult {
   isSupported: boolean;
@@ -45,7 +45,7 @@ export function useICRC99Support(canisterId: string | null): ICRC99SupportResult
         const { HttpAgent, Actor } = await import('@dfinity/agent');
         
         const agent = new HttpAgent({
-          host: process.env.DFX_NETWORK === 'local' ? 'http://localhost:8080' : 'https://ic0.app'
+          host: process.env.DFX_NETWORK === 'local' ? 'http://localhost:8080' : 'https://icp0.io'
         });
         
         // Fetch root key for local development
@@ -103,10 +103,10 @@ export function useICRC99Support(canisterId: string | null): ICRC99SupportResult
             transformedNetwork = { Ethereum: [] as [] };
           }
         } else if ('Solana' in networkVariant) {
-          // Solana network with optional chain ID (comes as [] or [nat])
+          // Solana network with optional cluster (comes as [] or [SolanaCluster])
           if (networkVariant.Solana.length > 0) {
-            const chainId = BigInt(networkVariant.Solana[0]);
-            transformedNetwork = { Solana: [chainId] as [bigint] };
+            const cluster = networkVariant.Solana[0] as SolanaCluster;
+            transformedNetwork = { Solana: [cluster] as [SolanaCluster] };
           } else {
             transformedNetwork = { Solana: [] as [] };
           }
@@ -135,11 +135,12 @@ export function useICRC99Support(canisterId: string | null): ICRC99SupportResult
         console.log('⚠️ ICRC-99 not supported or call failed:', icrc99Error);
         
         if (!cancelled) {
+          // Use the actual ckNFT canister ID as the contract identifier
           setResult({
             isSupported: false,
             nativeChain: {
-              network: { IC: [] }, // Default to empty IC network
-              contract: canisterId,
+              network: { IC: [] },
+              contract: canisterId, // Use the ckNFT canister ID
             },
             isLoading: false,
           });
