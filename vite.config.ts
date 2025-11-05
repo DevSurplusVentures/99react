@@ -12,13 +12,31 @@ dotenv.config({ path: ".env" });
 export default defineConfig({
   build: {
     outDir: "src/frontend/dist",
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      define: {
-        global: "globalThis",
+    emptyOutDir: true,
+    // Ensure compatibility with IC asset canister
+    rollupOptions: {
+      output: {
+        // Ensure stable chunk naming for IC caching
+        manualChunks: undefined,
       },
     },
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      '@metaplex-foundation/js',
+      '@solana/web3.js',
+    ],
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
+    },
+  },
+  define: {
+    'global': 'globalThis',
+    'process.env': {},
   },
   server: {
     proxy: {
@@ -45,6 +63,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src/frontend/"),
+      buffer: 'buffer/',
     },
   },
 });

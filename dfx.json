@@ -31,17 +31,18 @@
       "type": "motoko",
       "gzip": true
     },
-    "frontend": {
-      "dependencies": [
-        "backend"
+    "storybook": {
+
+      "source": [
+        "storybook-static/"
       ],
+      "type": "assets"
+    },
+    "frontend": {
       "source": [
         "src/frontend/dist"
       ],
-      "type": "assets",
-      "declarations": {
-        "output": "src/frontend/declarations"
-      }
+      "type": "assets"
     }
   },
   "defaults": {

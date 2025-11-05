@@ -23,6 +23,48 @@ Dependencies:
 - [Eslint 9](https://eslint.org/): The latest release of Eslint introduces the flat configuration API along with new rules and bug fixes.
 - [shadcn/ui](https://ui.shadcn.com/): Yes, shadcn support for Tailwind 4 is finally here!
 
+### Solana Integration
+
+The project includes comprehensive support for bridging NFTs between the Internet Computer and Solana using the **ICRC-99 cross-chain NFT protocol**. Key Solana integrations:
+
+#### 🔗 Wallet Support
+- **[@solana/wallet-adapter](https://github.com/solana-labs/wallet-adapter)** (v0.15.39): Industry-standard multi-wallet integration
+  - **Phantom** - Most popular Solana wallet
+  - **Backpack** - Developer-friendly with custom RPC support
+  - **Solflare** - Feature-rich with hardware wallet support
+  - Auto-detection of installed wallets
+  - Unified connection/signing interface
+
+#### 🎨 NFT Standards  
+- **[@metaplex-foundation/js](https://github.com/metaplex-foundation/js)** (v0.20.1): Solana NFT metadata and discovery
+  - Token Metadata Program integration
+  - Automatic NFT discovery by wallet
+  - Collection support and verification
+  - Compressed NFT (Bubblegum) support
+  - On-chain and off-chain metadata resolution
+
+#### 🌐 Network Flexibility
+- **Multi-cluster support**: mainnet-beta, devnet, testnet, custom RPC
+- **Local validator integration**: Full support for solana-test-validator
+- **Custom RPC detection**: Automatically detects and uses wallet-configured RPC endpoints
+- **Network mapping**: Seamless coordination between IC and Solana networks
+
+#### 🔄 Bridge Features
+- **Bidirectional transfers**: Import from Solana → IC, Export from IC → Solana
+- **Burn-and-mint architecture**: Secure cross-chain NFT transfers
+- **ICRC-99 protocol**: Source pointer tracking, cast operations, dual approval system
+- **Cost transparency**: Clear breakdown of cycles (IC) and SOL (Solana) costs
+- **Priority fee support**: 4 preset levels for Solana transaction speed
+
+#### 📚 Documentation
+- **Architecture docs** in `.plan/architecture/`:
+  - [`custom-rpc-support.md`](.plan/architecture/custom-rpc-support.md) - Custom RPC and local validator setup
+  - [`metaplex-integration.md`](.plan/architecture/metaplex-integration.md) - NFT metadata and discovery
+  - [`solana-wallet-adapter.md`](.plan/architecture/solana-wallet-adapter.md) - Wallet integration patterns
+  - [`solana-bridge-flow.md`](.plan/architecture/solana-bridge-flow.md) - Complete bridge workflows
+- **Quick start guide**: [`SOLANA_QUICKSTART.md`](SOLANA_QUICKSTART.md)
+- **Storybook stories**: Complete component and workflow documentation (see below)
+
 ## Setup, dev environment
 
 There are two main ways to set up the dev environment:
@@ -117,6 +159,24 @@ The Storybook documentation is organized into the following sections:
 - **Bridge Components** - Cross-chain bridge wizards and steps
 - **Market Components** - Marketplace and trading components
 
+#### 🌐 **Solana Bridge Stories** (New!)
+Complete documentation for Solana ↔ IC bridging:
+
+**Hooks:**
+- `SolanaHooks` - useSolana() hook with wallet connection, balance, signing (6 variants)
+
+**Import Wizard (Solana → IC):**
+- `SolanaConnectionStep` - Wallet connection and cluster selection (30+ variants)
+- `SolanaNetworkSelectionStep` - Network targeting and RPC configuration (23 variants)
+- `SolanaNFTSelectionStep` - NFT discovery via Metaplex, collection browsing (24 variants)
+- `SolanaImportWizard` - Complete 6-step import flow (17 variants)
+
+**Export Wizard (IC → Solana):**
+- `SolanaExportCostStep` - Cost calculation, dual approval, priority fees (27 variants)
+- `SolanaExportWizard` - Complete 4-step export flow with ICRC-99 cast (16 variants)
+
+**Total: 7 story files, 127+ documented variants**
+
 #### 🪝 **Hook Stories**
 - **Authentication Hooks** - User authentication and identity management
 - **NFT Hooks** - NFT metadata, collections, and ownership
@@ -149,6 +209,10 @@ The Storybook documentation is organized into the following sections:
 
 #### **Bridge System**
 - Review `Docs > Bridge Flow Documentation` for complete bridge workflows
+- **NEW: Solana Bridge** - Complete Solana ↔ IC bridging documentation:
+  - `Stories > Solana Hooks` - useSolana() hook usage
+  - `Stories > Bridge > Solana*` - All Solana bridge components
+  - See architecture docs in `.plan/architecture/` for technical details
 - Check bridge component stories for step-by-step wizards
 - Test different bridge scenarios (Export, Import, Burn, Return)
 
