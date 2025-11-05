@@ -1,0 +1,356 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Introduction" />
+
+# Welcome to 99React Storybook
+
+**Comprehensive documentation for the Internet Computer NFT Bridge**
+
+This Storybook contains complete documentation for all components, hooks, architecture patterns, and bridge workflows in the 99React project. Whether you're developing new features, integrating with the bridge, or just exploring the codebase, you'll find detailed examples and guidance here.
+
+---
+
+## 🚀 Quick Start
+
+### First Time Here?
+
+1. **Start with** [Architecture](?path=/docs/docs-architecture--docs) to understand the system design
+2. **Review** [Component Design System](?path=/docs/docs-componentdesignsystem--docs) for UI patterns
+3. **Explore** the **Solana Bridge** stories (NEW!) to see the complete bridging workflows
+4. **Browse** component stories in the sidebar for interactive examples
+
+### Navigation Structure
+
+Use the sidebar on the left to navigate through:
+- **📖 Docs** - System architecture, design patterns, workflows
+- **🧩 Stories > Components** - Interactive component library
+- **🪝 Stories > Hooks** - React hooks with live examples
+- **🌐 Stories > Bridge** - NEW! Complete Solana bridging documentation
+
+---
+
+## 🌐 Solana Integration (NEW!)
+
+Complete support for bridging NFTs between Solana and the Internet Computer using ICRC-99.
+
+### 📚 Quick Links
+
+**Hooks:**
+- [SolanaHooks](?path=/docs/hooks-solanahooks--docs) - useSolana() hook (6 variants)
+
+**Import Components (Solana → IC):**
+- [SolanaConnectionStep](?path=/docs/bridge-solanaconnectionstep--docs) - Wallet connection (30+ variants)
+- [SolanaNetworkSelectionStep](?path=/docs/bridge-solananetworkselectionstep--docs) - Network selection (23 variants)
+- [SolanaNFTSelectionStep](?path=/docs/bridge-solananftselectionstep--docs) - NFT discovery (24 variants)
+
+**Export Components (IC → Solana):**
+- [SolanaExportCostStep](?path=/docs/bridge-solanaexportcoststep--docs) - Cost calculation (27 variants)
+
+**Complete Wizards:**
+- [SolanaImportWizard](?path=/docs/solana-import-wizard--docs) - 6-step import flow (17 variants)
+- [SolanaExportWizard](?path=/docs/solana-export-wizard--docs) - 4-step export flow (16 variants)
+
+**📊 Total: 7 story files, 127+ documented variants**
+
+### 🏗️ Architecture Documentation
+
+Dive deep into the technical implementation:
+
+1. **[Custom RPC Support](../.plan/architecture/custom-rpc-support.md)**
+   - Automatic custom RPC detection
+   - MapNetwork orchestrator configuration
+   - Local validator workflow with Backpack
+   - Cluster selection for bridging
+
+2. **[Metaplex Integration](../.plan/architecture/metaplex-integration.md)**
+   - Metaplex Foundation JS SDK usage
+   - NFT metadata standards (on-chain + off-chain)
+   - Digital Asset API patterns
+   - Collection verification and grouping
+
+3. **[Solana Wallet Adapter](../.plan/architecture/solana-wallet-adapter.md)**
+   - Multi-wallet support (Phantom/Backpack/Solflare)
+   - SolanaWalletProvider setup
+   - Transaction signing flows
+   - Error handling and retry logic
+
+4. **[Solana Bridge Flow](../.plan/architecture/solana-bridge-flow.md)**
+   - Complete import/export workflows
+   - ICRC-99 protocol integration
+   - Cost calculation algorithms
+   - Progress tracking and state management
+
+### 🎯 Quick Start Guide
+
+New to Solana bridging? Check out the **[Solana Quick Start Guide](../SOLANA_QUICKSTART.md)** for:
+- Wallet installation (Phantom, Backpack, Solflare)
+- Network selection and configuration
+- Getting test SOL from faucets
+- Local validator setup
+- Step-by-step import/export tutorials
+- Troubleshooting common issues
+
+---
+
+## 📖 System Documentation
+
+### Core Architecture
+
+**[Architecture Overview](?path=/docs/docs-architecture--docs)**
+- System design and component hierarchy
+- Data flow between IC and Solana
+- State management patterns
+- Provider architecture
+
+**[Component Design System](?path=/docs/docs-componentdesignsystem--docs)**
+- Design tokens and theming
+- Component composition patterns
+- Accessibility guidelines
+- Responsive design principles
+
+**[Hook Usage Patterns](?path=/docs/docs-hookusagepatterns--docs)**
+- React hooks patterns and best practices
+- Custom hook composition
+- Error handling strategies
+- Real-world integration examples
+
+**[Bridge Flow Documentation](?path=/docs/docs-bridgeflowdocumentation--docs)**
+- Cross-chain bridge workflows
+- ICRC-99 protocol details
+- Testing strategies
+- Error recovery patterns
+
+---
+
+## 🧩 Component Stories
+
+### UI Components
+Basic building blocks for the application:
+- Buttons, Cards, Dialogs
+- Forms and Inputs
+- Navigation elements
+- Layout components
+
+### NFT Components
+NFT-specific UI elements:
+- NFT Cards and Grids
+- Collection displays
+- Metadata viewers
+- Gallery components
+
+### Bridge Components
+Cross-chain bridging interfaces:
+- **Solana Bridge** (NEW! - see above)
+- Bridge wizards and flows
+- Progress tracking
+- Cost calculators
+
+### Market Components
+Marketplace and trading interfaces:
+- Listings and orders
+- Price displays
+- Trading flows
+- Market analytics
+
+---
+
+## 🪝 Hook Stories
+
+### Authentication Hooks
+- User identity management
+- IC agent initialization
+- Session handling
+- Permission checking
+
+### NFT Hooks
+- NFT metadata fetching
+- Collection management
+- Ownership queries
+- Transfer operations
+
+### Bridge Hooks
+- **Solana Hooks** (NEW! - `useSolana()`)
+- Cross-chain operations
+- Cost estimation
+- Progress tracking
+
+### Market Hooks
+- Marketplace queries
+- Price calculation
+- Order management
+- Trading operations
+
+### Utility Hooks
+- Common helper hooks
+- State management
+- Data fetching
+- Caching strategies
+
+---
+
+## 🔍 Using This Storybook
+
+### Interactive Controls
+
+Most stories include **Controls** in the bottom panel:
+- Adjust props in real-time
+- See component behavior change live
+- Test different configurations
+- Explore edge cases
+
+### Code Snippets
+
+Click **Show code** on any story to see:
+- Implementation details
+- Props configuration
+- Usage examples
+- Integration patterns
+
+### Responsive Testing
+
+Use the **viewport toolbar** (top of canvas) to test:
+- Mobile layouts (375px, 414px)
+- Tablet layouts (768px, 1024px)
+- Desktop layouts (1440px, 1920px)
+
+### Documentation
+
+Each component includes:
+- **Overview** - Purpose and usage
+- **Props** - Complete prop documentation
+- **Examples** - Multiple usage scenarios
+- **Best Practices** - Implementation guidance
+
+---
+
+## 🎯 Common Workflows
+
+### Component Development
+1. Browse `Components` section for similar examples
+2. Check `Component Design System` for patterns
+3. Use `Controls` to experiment with props
+4. Review responsive behavior
+5. Check accessibility guidelines
+
+### Hook Integration
+1. Review `Hook Usage Patterns` for best practices
+2. Find similar hooks in `Hooks` section
+3. See live examples with real data
+4. Check error handling patterns
+5. Test loading states
+
+### Bridge Development
+1. **NEW!** Start with [Solana Bridge Flow](.plan/architecture/solana-bridge-flow.md)
+2. Review wizard components (SolanaImportWizard, SolanaExportWizard)
+3. Check individual step components
+4. Test complete workflows
+5. Verify error recovery
+
+### Testing
+1. Use stories as test scenarios
+2. Verify all states (loading, error, success)
+3. Test responsive layouts
+4. Check accessibility
+5. Validate edge cases
+
+---
+
+## 🔧 Development Tips
+
+### Search Functionality
+Use the **search bar** (top of sidebar) to quickly find:
+- Component names
+- Hook names  
+- Documentation pages
+- Story variants
+
+### Keyboard Shortcuts
+- `/` - Focus search
+- `↑` `↓` - Navigate stories
+- `F` - Toggle fullscreen
+- `D` - Toggle docs/canvas
+- `A` - Toggle addons panel
+
+### Viewing Source
+- **Show code** button on each story
+- **GitHub links** in component docs
+- **Architecture docs** linked throughout
+- **Quick start guide** for tutorials
+
+---
+
+## 🚀 Getting Started with Solana
+
+### For Beginners
+1. Read [Solana Quick Start Guide](../SOLANA_QUICKSTART.md)
+2. Install a wallet (Phantom recommended)
+3. Get test SOL from devnet faucet
+4. Try [SolanaImportWizard](?path=/docs/solana-import-wizard--docs) interactive story
+
+### For Developers
+1. Review [Architecture docs](.plan/architecture/)
+2. Study [SolanaHooks](?path=/docs/hooks-solanahooks--docs)
+3. Explore individual step components
+4. Check [Solana Bridge Flow](.plan/architecture/solana-bridge-flow.md)
+5. Set up local validator for testing
+
+### For Integrators
+1. Review [Wallet Adapter docs](.plan/architecture/solana-wallet-adapter.md)
+2. Check [Metaplex Integration](.plan/architecture/metaplex-integration.md)
+3. Study complete wizard flows
+4. Test with devnet before mainnet
+5. Follow error handling patterns
+
+---
+
+## 📚 Additional Resources
+
+### External Documentation
+- [React 19 Docs](https://react.dev)
+- [Solana Docs](https://docs.solana.com)
+- [Metaplex Docs](https://docs.metaplex.com)
+- [Internet Computer Docs](https://internetcomputer.org/docs)
+- [ICRC Standards](https://github.com/dfinity/ICRC)
+
+### Project Links
+- **Main README** - See [README.md](../README.md)
+- **Architecture Plans** - See `.plan/architecture/` directory
+- **Quick Start** - See [SOLANA_QUICKSTART.md](../SOLANA_QUICKSTART.md)
+- **Issue Tracker** - [GitHub Issues](#)
+- **Discord Community** - [Join Discord](#)
+
+### Developer Tools
+- [Solana Explorer](https://explorer.solana.com)
+- [IC Dashboard](https://dashboard.internetcomputer.org)
+- [Phantom Wallet](https://phantom.app)
+- [Backpack Wallet](https://backpack.app)
+- [Solflare Wallet](https://solflare.com)
+
+---
+
+## 🤝 Contributing
+
+Found a bug or want to improve documentation?
+
+1. Check existing stories for patterns
+2. Follow component/hook structure
+3. Include multiple variants
+4. Add documentation strings
+5. Test responsive layouts
+6. Submit PR with story updates
+
+---
+
+## 📝 Version Information
+
+- **Storybook**: 8.6.12
+- **React**: 19.1.0
+- **Solana Web3.js**: 1.95.8
+- **Wallet Adapter**: 0.15.39
+- **Metaplex**: 0.20.1
+
+---
+
+**Happy exploring!** 🎉
+
+Use the sidebar to navigate through all available documentation, components, hooks, and bridge workflows. The **Solana Bridge** section (NEW!) provides comprehensive coverage of cross-chain NFT bridging between Solana and the Internet Computer.

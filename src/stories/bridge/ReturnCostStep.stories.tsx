@@ -38,7 +38,7 @@ const mockSelectedICNFTs: SelectedICNFT[] = [
     name: 'Cool NFT #001',
     image: 'https://via.placeholder.com/400x400/6366f1/ffffff?text=NFT+001',
     description: 'A really cool NFT from the collection',
-    collection: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    collection: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     standard: 'ICRC-7',
     metadata: { name: 'Cool NFT #001', description: 'A really cool NFT from the collection' },
   },
@@ -47,7 +47,7 @@ const mockSelectedICNFTs: SelectedICNFT[] = [
     name: 'Amazing NFT #015',
     image: 'https://via.placeholder.com/400x400/ec4899/ffffff?text=NFT+015',
     description: 'An amazing NFT with unique properties',
-    collection: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    collection: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     standard: 'ICRC-7',
     metadata: { name: 'Amazing NFT #015', description: 'An amazing NFT with unique properties' },
   }
@@ -58,7 +58,7 @@ const mockSingleICNFT: SelectedICNFT = {
   name: 'Epic NFT #042',
   image: 'https://via.placeholder.com/400x400/10b981/ffffff?text=NFT+042',
   description: 'An epic NFT ready for return bridging',
-  collection: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+  collection: 'hsncy-tqaaa-aaaal-ar2eq-cai',
   standard: 'ICRC-7',
   metadata: { name: 'Epic NFT #042', description: 'An epic NFT ready for return bridging' },
 };

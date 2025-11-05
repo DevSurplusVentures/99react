@@ -188,6 +188,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -205,6 +206,7 @@ export const PreConfiguredBurn: Story = {
     sourceContractAddress: '0x1234567890123456789012345678901234567890',
     sourceTokenId: '123',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -220,6 +222,7 @@ export const EthereumBurn: Story = {
   args: {
     sourceChainId: '1',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -235,6 +238,7 @@ export const PolygonBurn: Story = {
   args: {
     sourceChainId: '137',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -250,6 +254,7 @@ export const BSCBurn: Story = {
   args: {
     sourceChainId: '56',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -266,6 +271,7 @@ export const LocalDevelopment: Story = {
     sourceChainId: '31337',
     sourceContractAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -281,6 +287,7 @@ export const InlineDisplay: Story = {
   args: {
     modal: false,
     className: 'max-w-4xl mx-auto',
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -295,10 +302,11 @@ export const InlineDisplay: Story = {
 export const SuccessfulBurn: Story = {
   args: {
     modal: true,
+    mockWalletConnected: true,
     mockBurnResult: {
       success: true,
       icTransactionHash: '0xa1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
-      ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+      ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
       tokenId: '123',
     },
   },
@@ -315,6 +323,7 @@ export const SuccessfulBurn: Story = {
 export const FailedBurn: Story = {
   args: {
     modal: true,
+    mockWalletConnected: true,
     mockBurnResult: {
       success: false,
       error: 'Insufficient gas fees for burn transaction. Please add more ETH to your wallet.',
@@ -335,6 +344,7 @@ export const MultiNFTBurn: Story = {
     sourceChainId: '1',
     sourceContractAddress: '0x1234567890123456789012345678901234567890',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -350,6 +360,7 @@ export const NetworkSwitchRequired: Story = {
   args: {
     sourceChainId: '137', // Polygon
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -367,6 +378,7 @@ export const PremiumCollectionBurn: Story = {
     sourceContractAddress: '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D', // BAYC-style
     sourceTokenId: '8888',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -382,6 +394,7 @@ export const HighGasBurn: Story = {
   args: {
     sourceChainId: '1',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -392,10 +405,11 @@ export const HighGasBurn: Story = {
   },
 };
 
-// Wallet connection error state
+// Wallet connection error state  
 export const WalletConnectionError: Story = {
   args: {
     modal: true,
+    mockWalletConnected: false, // Explicitly set to false to show connection error
   },
   parameters: {
     docs: {
@@ -410,6 +424,7 @@ export const WalletConnectionError: Story = {
 export const CustomDiscoveryService: Story = {
   args: {
     modal: true,
+    mockWalletConnected: true,
     nftDiscoveryService: {
       discoverCollections: async () => [
         {
@@ -445,6 +460,7 @@ export const ArbitrumBurn: Story = {
   args: {
     sourceChainId: '42161',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -460,6 +476,7 @@ export const OptimismBurn: Story = {
   args: {
     sourceChainId: '10',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -475,6 +492,7 @@ export const BaseBurn: Story = {
   args: {
     sourceChainId: '8453',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -489,6 +507,7 @@ export const BaseBurn: Story = {
 export const ConnectionStep: Story = {
   args: {
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -506,6 +525,7 @@ export const CostCalculationStep: Story = {
     sourceContractAddress: '0x1234567890123456789012345678901234567890',
     sourceTokenId: '123',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {
@@ -523,6 +543,7 @@ export const TransactionMonitoring: Story = {
     sourceContractAddress: '0x1234567890123456789012345678901234567890',
     sourceTokenId: '123',
     modal: true,
+    mockWalletConnected: true,
   },
   parameters: {
     docs: {

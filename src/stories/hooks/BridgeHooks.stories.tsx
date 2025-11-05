@@ -41,16 +41,35 @@ const withBridgeProviders = (Story: any) => (
  * BridgeHooksDemo - Demonstrates bridge and ICRC99 hook usage patterns
  */
 function BridgeHooksDemo() {
-  const [canisterId, setCanisterId] = useState('rdmx6-jaaaa-aaaah-qcaaa-cai');
+  const [canisterId, setCanisterId] = useState('ryjl3-tyaaa-aaaaa-aaaba-cai'); // NNS Governance canister - valid Principal
   const [tokenId, setTokenId] = useState('1');
   const [contractAddress, setContractAddress] = useState('0x1234567890123456789012345678901234567890');
   const [chainId, setChainId] = useState('1');
+  const orchestratorId = process.env.VITE_ICRC99_ORCHESTRATOR_CANISTER_ID || 'um5iw-rqaaa-aaaaq-qaaba-cai'; // Cycles ledger - valid Principal
 
-  // Hook usage examples
+  // Hook usage examples with correct API
   const supportQuery = useICRC99Support(canisterId);
-  const fundingQuery = useICRC99FundingAddress(canisterId);
-  const bridgeQuery = useNFTBridge(canisterId, BigInt(tokenId || '1'));
-  const mutations = use99Mutations();
+  const fundingQuery = useICRC99FundingAddress(
+    canisterId ? Principal.fromText(canisterId) : null,
+    { Ethereum: [] } // Ethereum network with no specific chain ID filter
+  );
+  
+  // Create proper bridge config for useNFTBridge
+  const bridgeConfig = {
+    sourceChain: {
+      chainId: parseInt(chainId || '1'),
+      name: 'Ethereum',
+      contractAddress: contractAddress || '0x1234567890123456789012345678901234567890'
+    },
+    targetChain: {
+      chainId: 1,
+      name: 'Ethereum',
+      bridgeAddress: '0x0000000000000000000000000000000000000000'
+    }
+  };
+  
+  const bridgeQuery = useNFTBridge(bridgeConfig);
+  const mutations = use99Mutations(orchestratorId);
 
   const [bridgeStatus, setBridgeStatus] = useState<'idle' | 'importing' | 'exporting' | 'success' | 'error'>('idle');
   const [bridgeError, setBridgeError] = useState<string | null>(null);
@@ -63,7 +82,7 @@ function BridgeHooksDemo() {
       // Mock import flow
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      if (mutations.importNFT) {
+      if (mutations.mintFromEVM) {
         // Simulate import mutation
         console.log('Importing NFT from contract:', contractAddress);
         setBridgeStatus('success');
@@ -84,7 +103,7 @@ function BridgeHooksDemo() {
       // Mock export flow
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      if (mutations.exportNFT) {
+      if (mutations.castToEVM) {
         // Simulate export mutation
         console.log('Exporting NFT to contract:', contractAddress);
         setBridgeStatus('success');
@@ -161,30 +180,30 @@ function BridgeHooksDemo() {
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600">Status:</span>
             <span className={`px-2 py-1 rounded text-xs ${
-              supportQuery.loading ? 'bg-yellow-100 text-yellow-800' :
+              supportQuery.isLoading ? 'bg-yellow-100 text-yellow-800' :
               supportQuery.error ? 'bg-red-100 text-red-800' :
-              supportQuery.supported ? 'bg-green-100 text-green-800' :
+              supportQuery.isSupported ? 'bg-green-100 text-green-800' :
               'bg-gray-100 text-gray-600'
             }`}>
-              {supportQuery.loading ? 'Checking...' : 
+              {supportQuery.isLoading ? 'Checking...' : 
                supportQuery.error ? 'Error' :
-               supportQuery.supported ? 'ICRC99 Supported' : 'Not Supported'}
+               supportQuery.isSupported ? 'ICRC99 Supported' : 'Not Supported'}
             </span>
           </div>
           
           {supportQuery.error && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-              Error: {supportQuery.error}
+              Error: {String(supportQuery.error)}
             </div>
           )}
           
-          {supportQuery.supported !== undefined && (
+          {supportQuery.isSupported !== undefined && (
             <div className="bg-gray-50 p-4 rounded">
               <h3 className="font-semibold mb-2">Bridge Support:</h3>
               <div className="text-sm space-y-1">
-                <p><strong>ICRC99 Bridge:</strong> {supportQuery.supported ? '✅ Available' : '❌ Not Available'}</p>
-                <p><strong>Cross-chain NFTs:</strong> {supportQuery.supported ? '✅ Supported' : '❌ Not Supported'}</p>
-                {supportQuery.supported && (
+                <p><strong>ICRC99 Bridge:</strong> {supportQuery.isSupported ? '✅ Available' : '❌ Not Available'}</p>
+                <p><strong>Cross-chain NFTs:</strong> {supportQuery.isSupported ? '✅ Supported' : '❌ Not Supported'}</p>
+                {supportQuery.isSupported && (
                   <div className="mt-2 p-2 bg-green-50 rounded text-green-700">
                     This collection supports bridging NFTs to/from EVM networks
                   </div>
@@ -202,27 +221,27 @@ function BridgeHooksDemo() {
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600">Status:</span>
             <span className={`px-2 py-1 rounded text-xs ${
-              fundingQuery.loading ? 'bg-yellow-100 text-yellow-800' :
+              fundingQuery.isLoading ? 'bg-yellow-100 text-yellow-800' :
               fundingQuery.error ? 'bg-red-100 text-red-800' :
               'bg-green-100 text-green-800'
             }`}>
-              {fundingQuery.loading ? 'Generating...' : 
+              {fundingQuery.isLoading ? 'Generating...' : 
                fundingQuery.error ? 'Error' : 'Generated'}
             </span>
           </div>
           
           {fundingQuery.error && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-              Error: {fundingQuery.error}
+              Error: {String(fundingQuery.error)}
             </div>
           )}
           
-          {fundingQuery.address && (
+          {fundingQuery.data && (
             <div className="bg-gray-50 p-4 rounded">
               <h3 className="font-semibold mb-2">Funding Address:</h3>
               <div className="text-sm space-y-2">
                 <div className="bg-white p-2 rounded border font-mono text-xs">
-                  {fundingQuery.address}
+                  {fundingQuery.data}
                 </div>
                 <p className="text-gray-600">
                   Use this address to fund bridge operations. Send ETH here to cover gas fees.
@@ -235,39 +254,36 @@ function BridgeHooksDemo() {
 
       {/* useNFTBridge Hook */}
       <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-bold mb-4">useNFTBridge({canisterId}, {tokenId})</h2>
+        <h2 className="text-xl font-bold mb-4">useNFTBridge(config)</h2>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600">Status:</span>
             <span className={`px-2 py-1 rounded text-xs ${
-              bridgeQuery.loading ? 'bg-yellow-100 text-yellow-800' :
+              bridgeQuery.isLoading ? 'bg-yellow-100 text-yellow-800' :
               bridgeQuery.error ? 'bg-red-100 text-red-800' :
               'bg-green-100 text-green-800'
             }`}>
-              {bridgeQuery.loading ? 'Loading...' : 
+              {bridgeQuery.isLoading ? 'Loading...' : 
                bridgeQuery.error ? 'Error' : 'Loaded'}
             </span>
           </div>
           
           {bridgeQuery.error && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-              Error: {bridgeQuery.error}
+              Error: {String(bridgeQuery.error)}
             </div>
           )}
           
-          {bridgeQuery.status && (
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="font-semibold mb-2">Bridge Status:</h3>
-              <div className="text-sm space-y-1">
-                <p><strong>Current State:</strong> {bridgeQuery.status.state}</p>
-                <p><strong>Origin Chain:</strong> {bridgeQuery.status.originChain || 'Internet Computer'}</p>
-                <p><strong>Target Chain:</strong> {bridgeQuery.status.targetChain || 'Not bridged'}</p>
-                {bridgeQuery.status.transactionHash && (
-                  <p><strong>Transaction Hash:</strong> {bridgeQuery.status.transactionHash}</p>
-                )}
-              </div>
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-semibold mb-2">Bridge Methods Available:</h3>
+            <div className="text-sm space-y-1">
+              <p>• <strong>getNFTDetails(tokenId)</strong> - Fetch NFT metadata</p>
+              <p>• <strong>checkBridgeEligibility(tokenId, userAddress)</strong> - Verify can bridge</p>
+              <p>• <strong>approveForBridge(tokenId)</strong> - Approve NFT transfer</p>
+              <p>• <strong>estimateBridgeCost(tokenId)</strong> - Calculate gas fees</p>
+              <p>• <strong>prepareBridgeTransaction(tokenId, targetAddress)</strong> - Prepare tx</p>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -316,10 +332,10 @@ function BridgeHooksDemo() {
           <div className="bg-gray-50 p-4 rounded">
             <h3 className="font-semibold mb-2">Available Mutations:</h3>
             <div className="text-sm space-y-1">
-              <p><strong>importNFT:</strong> {mutations.importNFT ? '✅ Available' : '❌ Not Available'}</p>
-              <p><strong>exportNFT:</strong> {mutations.exportNFT ? '✅ Available' : '❌ Not Available'}</p>
-              <p><strong>bridgeStatus:</strong> {mutations.bridgeStatus ? '✅ Available' : '❌ Not Available'}</p>
-              <p><strong>cancelBridge:</strong> {mutations.cancelBridge ? '✅ Available' : '❌ Not Available'}</p>
+              <p><strong>mintFromEVM:</strong> {mutations.mintFromEVM ? '✅ Available' : '❌ Not Available'}</p>
+              <p><strong>castToEVM:</strong> {mutations.castToEVM ? '✅ Available' : '❌ Not Available'}</p>
+              <p><strong>createCanister:</strong> {mutations.createCanister ? '✅ Available' : '❌ Not Available'}</p>
+              <p><strong>createRemoteContract:</strong> {mutations.createRemoteContract ? '✅ Available' : '❌ Not Available'}</p>
             </div>
           </div>
         </div>

@@ -129,7 +129,7 @@ The component integrates with multiple systems:
 ### Pre-configured Return
 \`\`\`tsx
 <ICReturnWizard
-  ckNFTCanisterId="rdmx6-jaaaa-aaaah-qcaiq-cai"
+  ckNFTCanisterId="hsncy-tqaaa-aaaal-ar2eq-cai"
   tokenId="123"
   targetChainId="1"
   targetContractAddress="0x..."
@@ -237,7 +237,7 @@ export const Default: Story = {
 // Pre-configured with ckNFT details
 export const PreConfiguredReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     targetChainId: '1',
     targetContractAddress: '0x1234567890123456789012345678901234567890',
@@ -255,7 +255,7 @@ export const PreConfiguredReturn: Story = {
 // Ethereum return scenario
 export const EthereumReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     targetChainId: '1',
     modal: true,
@@ -272,7 +272,7 @@ export const EthereumReturn: Story = {
 // Polygon return scenario
 export const PolygonReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '456',
     targetChainId: '137',
     modal: true,
@@ -289,7 +289,7 @@ export const PolygonReturn: Story = {
 // BSC return scenario
 export const BSCReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '789',
     targetChainId: '56',
     modal: true,
@@ -306,7 +306,7 @@ export const BSCReturn: Story = {
 // Local development return
 export const LocalDevelopmentReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '1',
     targetChainId: '31337',
     targetContractAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
@@ -378,7 +378,7 @@ export const FailedReturn: Story = {
 // Multi-ckNFT return scenario
 export const MultiCkNFTReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     modal: true,
   },
   parameters: {
@@ -393,7 +393,7 @@ export const MultiCkNFTReturn: Story = {
 // Native chain auto-detection
 export const NativeChainDetection: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     modal: true,
   },
@@ -409,7 +409,7 @@ export const NativeChainDetection: Story = {
 // Cross-chain validation error
 export const CrossChainValidationError: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     targetChainId: '137', // Wrong chain
     targetContractAddress: '0x9999999999999999999999999999999999999999', // Wrong contract
@@ -427,7 +427,7 @@ export const CrossChainValidationError: Story = {
 // High gas cost scenario
 export const HighGasCostReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     targetChainId: '1',
     modal: true,
@@ -444,7 +444,7 @@ export const HighGasCostReturn: Story = {
 // Burn address funding required
 export const BurnAddressFundingRequired: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     targetChainId: '1',
     modal: true,
@@ -461,7 +461,7 @@ export const BurnAddressFundingRequired: Story = {
 // Arbitrum Layer 2 return
 export const ArbitrumReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     targetChainId: '42161',
     modal: true,
@@ -478,7 +478,7 @@ export const ArbitrumReturn: Story = {
 // Optimism Layer 2 return
 export const OptimismReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '456',
     targetChainId: '10',
     modal: true,
@@ -495,7 +495,7 @@ export const OptimismReturn: Story = {
 // Base network return
 export const BaseReturn: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '789',
     targetChainId: '8453',
     modal: true,
@@ -526,7 +526,7 @@ export const ICWalletConnection: Story = {
 // ckNFT selection step
 export const CkNFTSelection: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     modal: true,
   },
   parameters: {
@@ -541,7 +541,7 @@ export const CkNFTSelection: Story = {
 // Target network configuration step
 export const TargetNetworkConfiguration: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     modal: true,
   },
@@ -557,7 +557,7 @@ export const TargetNetworkConfiguration: Story = {
 // Cost calculation and funding
 export const CostCalculationAndFunding: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     targetChainId: '1',
     targetContractAddress: '0x1234567890123456789012345678901234567890',
@@ -575,7 +575,7 @@ export const CostCalculationAndFunding: Story = {
 // Transaction execution monitoring
 export const TransactionExecutionMonitoring: Story = {
   args: {
-    ckNFTCanisterId: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+    ckNFTCanisterId: 'hsncy-tqaaa-aaaal-ar2eq-cai',
     tokenId: '123',
     targetChainId: '1',
     targetContractAddress: '0x1234567890123456789012345678901234567890',

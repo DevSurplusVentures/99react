@@ -52,7 +52,7 @@ function CyclesLedgerDemo() {
   } = useCyclesLedger();
 
   const [approveAmount, setApproveAmount] = useState('1000000000000'); // 1T cycles
-  const [spenderPrincipal, setSpenderPrincipal] = useState('rdmx6-jaaaa-aaaah-qcaaa-cai');
+  const [spenderPrincipal, setSpenderPrincipal] = useState('ryjl3-tyaaa-aaaaa-aaaba-cai'); // NNS Governance - valid Principal
 
   const handleApprove = () => {
     try {
@@ -138,7 +138,7 @@ function CyclesLedgerDemo() {
                 type="text"
                 value={spenderPrincipal}
                 onChange={(e) => setSpenderPrincipal(e.target.value)}
-                placeholder="rdmx6-jaaaa-aaaah-qcaaa-cai"
+                placeholder="ryjl3-tyaaa-aaaaa-aaaba-cai"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
               />
             </div>
@@ -166,7 +166,7 @@ function CyclesLedgerDemo() {
 
           {approveMutation.error && (
             <div className="mt-2 text-sm text-red-600">
-              Error: {approveMutation.error.message}
+              Error: {String(approveMutation.error)}
             </div>
           )}
 
@@ -278,7 +278,7 @@ function FungibleTokenDemo() {
  */
 function TokenMutationDemo() {
   const [tokenCanisterId, setTokenCanisterId] = useState('mxzaz-hqaaa-aaaar-qaada-cai');
-  const [spenderPrincipal, setSpenderPrincipal] = useState('rdmx6-jaaaa-aaaah-qcaaa-cai');
+  const [spenderPrincipal, setSpenderPrincipal] = useState('ryjl3-tyaaa-aaaaa-aaaba-cai'); // NNS Governance - valid Principal
   const [approveAmount, setApproveAmount] = useState('1000000000');
   
   const approveMutation = useApproveToken(tokenCanisterId);
@@ -372,7 +372,7 @@ function TokenMutationDemo() {
           {approveMutation.error && (
             <div className="bg-red-50 border border-red-200 p-3 rounded">
               <h4 className="font-semibold text-red-800">Error</h4>
-              <p className="text-red-700 text-sm">{approveMutation.error.message}</p>
+              <p className="text-red-700 text-sm">{String(approveMutation.error)}</p>
             </div>
           )}
 
@@ -506,7 +506,7 @@ function CyclesWidget() {
       <div>Balance: {balance ? formatCycles(balance) : 'Loading...'}</div>
       <div>Can afford 1T cycles: {hasSufficientBalance(BigInt(1e12)) ? '✅' : '❌'}</div>
       
-      <button onClick={() => handleApproveCanister('rdmx6-jaaaa-aaaah-qcaaa-cai', BigInt(1e12))}>
+      <button onClick={() => handleApproveCanister('ryjl3-tyaaa-aaaaa-aaaba-cai', BigInt(1e12))}>
         Approve 1T Cycles
       </button>
     </div>

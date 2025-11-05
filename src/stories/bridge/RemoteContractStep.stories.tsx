@@ -189,9 +189,11 @@ export const Docs: Story = {
   name: '📖 Documentation',
   args: {
     selectedNFTs: mockSelectedNFTs,
-    targetNetwork: mockTargetNetwork,
+    targetChainId: '1',
+    remoteContractInfo: null,
+    sourceCanisterId: '2223e-iaaaa-aaaac-awyra-cai',
     sourceContractPointer: mockSourceContractPointer,
-    onContractConfigured: (info) => console.log('Contract configured:', info)
+    onRemoteContractInfoChange: (info) => console.log('Remote contract info changed:', info)
   },
   parameters: {
     docs: {

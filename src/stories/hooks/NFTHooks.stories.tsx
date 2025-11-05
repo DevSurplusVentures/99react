@@ -2,7 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
 import { useNFTOwner } from '../../hooks/useNFTOwner';
 import { useNFTOwnerOf } from '../../hooks/useNFTOwnerOf';
+import { useNFTCollection } from '../../hooks/useNFTCollection';
+import { useNFTMetadata } from '../../hooks/useNFTMetadata';
 import { Principal } from '@dfinity/principal';
+import type { Account } from '../../core/Account';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IdentityKitProvider } from '@nfid/identitykit/react';
 import { IdentityKitAuthType } from '@nfid/identitykit';
@@ -39,21 +42,121 @@ const withNFTProviders = (Story: any) => (
  * NFTHooksDemo - Demonstrates NFT-related hook usage patterns
  */
 function NFTHooksDemo() {
-  const [canisterId, setCanisterId] = useState('rdmx6-jaaaa-aaaah-qcaaa-cai');
+  const [canisterId, setCanisterId] = useState('ryjl3-tyaaa-aaaaa-aaaba-cai'); // NNS Governance - valid Principal
   const [tokenId, setTokenId] = useState('1');
-  const [ownerPrincipal, setOwnerPrincipal] = useState('');
+  const [ownerPrincipal, setOwnerPrincipal] = useState('ryjl3-tyaaa-aaaaa-aaaba-cai');
+  const [useMockData, setUseMockData] = useState(true);
 
-  // Hook usage examples
-  const collectionQuery = useNFTCollection(canisterId);
-  const metadataQuery = useNFTMetadata(canisterId, BigInt(tokenId || '1'));
-  const ownerQuery = useNFTOwner(canisterId, ownerPrincipal);
-  const ownerOfQuery = useNFTOwnerOf(canisterId, BigInt(tokenId || '1'));
+  // Mock data for demonstration
+  const mockCollectionData = {
+    name: 'Demo NFT Collection',
+    symbol: 'DEMO',
+    description: 'A demonstration NFT collection for Storybook',
+    logo: 'https://example.com/logo.png',
+    totalSupply: BigInt(1000),
+    supplyCap: BigInt(10000),
+    raw: [
+      ['icrc7:name', { Text: 'Demo NFT Collection' }],
+      ['icrc7:symbol', { Text: 'DEMO' }],
+      ['icrc7:description', { Text: 'A demonstration NFT collection for Storybook' }],
+    ] as any[],
+  };
+
+  const mockMetadata = {
+    allMetadata: [
+      ['icrc7:name', { Text: `Demo NFT #${tokenId}` }],
+      ['icrc7:description', { Text: 'A demonstration NFT token' }],
+    ] as any[],
+    parsedMetadata: {
+      icrc97raw: JSON.stringify({
+        name: `Demo NFT #${tokenId}`,
+        description: 'A demonstration NFT token',
+        image: 'https://example.com/nft.png',
+        attributes: [
+          { trait_type: 'Rarity', value: 'Common' },
+          { trait_type: 'Power', value: '100' },
+        ],
+      }),
+      icrc97: {
+        name: `Demo NFT #${tokenId}`,
+        description: 'A demonstration NFT token',
+        image: 'https://example.com/nft.png',
+        animation_url: '',
+        external_url: '',
+        attributes: [
+          { trait_type: 'Rarity', value: 'Common' },
+          { trait_type: 'Power', value: '100' },
+        ],
+      },
+    },
+    tokenId: BigInt(tokenId || '1'),
+  };
+
+  const mockOwner: Account = {
+    owner: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+    subaccount: undefined,
+  };
+
+  const mockTokenIds = [BigInt(1), BigInt(2), BigInt(3), BigInt(42), BigInt(100)];
+
+  // Hook usage with mock overrides for demonstration
+  const collectionQuery = useNFTCollection(canisterId, {
+    override: useMockData ? async () => mockCollectionData : undefined,
+  });
+
+  const metadataQuery = useNFTMetadata(canisterId, BigInt(tokenId || '1'), {
+    override: useMockData ? async () => mockMetadata : undefined,
+  });
+
+  const ownerQuery = useNFTOwner(canisterId, BigInt(tokenId || '1'), {
+    override: useMockData ? async () => mockOwner : undefined,
+  });
+  
+  // useNFTOwnerOf expects an Account object
+  const ownerAccount: Account = {
+    owner: ownerPrincipal, // Principal as string
+    subaccount: undefined,
+  };
+  
+  const ownerOfQuery = useNFTOwnerOf(canisterId, ownerAccount, {
+    override: useMockData ? async () => mockTokenIds : undefined,
+  });
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Info Banner */}
+      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+        <div className="flex items-start gap-3">
+          <span className="text-blue-600 text-xl">ℹ️</span>
+          <div className="flex-1">
+            <h3 className="font-semibold text-blue-900 mb-1">Demo Mode</h3>
+            <p className="text-sm text-blue-800">
+              These hooks require an ICRC-7 NFT canister. The default canister (NNS Governance) is not an NFT canister.
+              Toggle "Use Mock Data" below to see the hooks with demonstration data, or provide a valid ICRC-7 canister ID.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="bg-white p-6 rounded-lg shadow-sm border">
         <h2 className="text-xl font-bold mb-4">NFT Hook Controls</h2>
+        
+        {/* Mock Data Toggle */}
+        <div className="mb-4 p-3 bg-gray-50 rounded border">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={useMockData}
+              onChange={(e) => setUseMockData(e.target.checked)}
+              className="w-4 h-4 text-blue-600 rounded"
+            />
+            <span className="text-sm font-medium text-gray-700">
+              Use Mock Data (Enable to see demo data instead of real canister calls)
+            </span>
+          </label>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -112,7 +215,7 @@ function NFTHooksDemo() {
           
           {collectionQuery.error && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-              Error: {collectionQuery.error}
+              Error: {String(collectionQuery.error)}
             </div>
           )}
           
@@ -148,7 +251,7 @@ function NFTHooksDemo() {
           
           {metadataQuery.error && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-              Error: {metadataQuery.error}
+              Error: {String(metadataQuery.error)}
             </div>
           )}
           
@@ -178,7 +281,7 @@ function NFTHooksDemo() {
 
       {/* useNFTOwner Hook */}
       <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-bold mb-4">useNFTOwner({canisterId}, owner)</h2>
+        <h2 className="text-xl font-bold mb-4">useNFTOwner({canisterId}, {tokenId})</h2>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600">Status:</span>
@@ -194,20 +297,17 @@ function NFTHooksDemo() {
           
           {ownerQuery.error && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-              Error: {ownerQuery.error}
+              Error: {String(ownerQuery.error)}
             </div>
           )}
           
-          {ownerQuery.tokens && (
+          {ownerQuery.owner && (
             <div className="bg-gray-50 p-4 rounded">
-              <h3 className="font-semibold mb-2">Owned NFTs:</h3>
+              <h3 className="font-semibold mb-2">Owner Account:</h3>
               <div className="text-sm">
-                <p><strong>Total Tokens:</strong> {ownerQuery.tokens.length}</p>
-                {ownerQuery.tokens.length > 0 && (
-                  <div>
-                    <strong>Token IDs:</strong> {ownerQuery.tokens.slice(0, 10).map(t => t.toString()).join(', ')}
-                    {ownerQuery.tokens.length > 10 && '...'}
-                  </div>
+                <p><strong>Owner:</strong> {ownerQuery.owner.owner}</p>
+                {ownerQuery.owner.subaccount && (
+                  <p><strong>Subaccount:</strong> {JSON.stringify(Array.from(ownerQuery.owner.subaccount))}</p>
                 )}
               </div>
             </div>
@@ -217,7 +317,7 @@ function NFTHooksDemo() {
 
       {/* useNFTOwnerOf Hook */}
       <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-bold mb-4">useNFTOwnerOf({canisterId}, {tokenId})</h2>
+        <h2 className="text-xl font-bold mb-4">useNFTOwnerOf({canisterId}, Account)</h2>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600">Status:</span>
@@ -233,18 +333,19 @@ function NFTHooksDemo() {
           
           {ownerOfQuery.error && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-              Error: {ownerOfQuery.error}
+              Error: {String(ownerOfQuery.error)}
             </div>
           )}
           
-          {ownerOfQuery.owner && (
+          {ownerOfQuery.tokenIds && ownerOfQuery.tokenIds.length > 0 && (
             <div className="bg-gray-50 p-4 rounded">
-              <h3 className="font-semibold mb-2">Owner Information:</h3>
+              <h3 className="font-semibold mb-2">Owned Token IDs:</h3>
               <div className="text-sm space-y-1">
-                <p><strong>Owner:</strong> {ownerOfQuery.owner.owner}</p>
-                {ownerOfQuery.owner.subaccount && (
-                  <p><strong>Subaccount:</strong> {JSON.stringify(ownerOfQuery.owner.subaccount)}</p>
-                )}
+                <p><strong>Total Tokens:</strong> {ownerOfQuery.tokenIds.length}</p>
+                <div>
+                  <strong>Token IDs:</strong> {ownerOfQuery.tokenIds.slice(0, 10).map((t: bigint) => t.toString()).join(', ')}
+                  {ownerOfQuery.tokenIds.length > 10 && ' ...'}
+                </div>
               </div>
             </div>
           )}

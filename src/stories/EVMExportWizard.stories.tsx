@@ -129,8 +129,29 @@ const mockSelectedICNFTs = [
     tokenId: '1',
     canisterId: 'umunu-kh777-77774-qaaca-cai',
     metadata: {
-      name: 'Bored Ape #1234',
-      description: 'A rare Bored Ape NFT from the BAYC collection',
+      allMetadata: [
+        ['icrc7:name', { Text: 'Bored Ape #1234' }],
+        ['icrc7:description', { Text: 'A rare Bored Ape NFT from the BAYC collection' }],
+      ] as any,
+      parsedMetadata: {
+        icrc97raw: JSON.stringify({
+          name: 'Bored Ape #1234',
+          description: 'A rare Bored Ape NFT from the BAYC collection',
+          image: 'https://via.placeholder.com/300x300/4F46E5/FFFFFF?text=BAYC+1234',
+          animation_url: '',
+          external_url: '',
+          attributes: [],
+        }),
+        icrc97: {
+          name: 'Bored Ape #1234',
+          description: 'A rare Bored Ape NFT from the BAYC collection',
+          image: 'https://via.placeholder.com/300x300/4F46E5/FFFFFF?text=BAYC+1234',
+          animation_url: '',
+          external_url: '',
+          attributes: [],
+        },
+      },
+      tokenId: BigInt(1),
     },
     owner: { toText: () => 'test-principal' } as any,
     image: 'https://via.placeholder.com/300x300/4F46E5/FFFFFF?text=BAYC+1234',
@@ -141,8 +162,29 @@ const mockSelectedICNFTs = [
     tokenId: '2',
     canisterId: 'umunu-kh777-77774-qaaca-cai',
     metadata: {
-      name: 'CryptoPunk #5678',
-      description: 'A classic CryptoPunk from the legendary collection',
+      allMetadata: [
+        ['icrc7:name', { Text: 'CryptoPunk #5678' }],
+        ['icrc7:description', { Text: 'A classic CryptoPunk from the legendary collection' }],
+      ] as any,
+      parsedMetadata: {
+        icrc97raw: JSON.stringify({
+          name: 'CryptoPunk #5678',
+          description: 'A classic CryptoPunk from the legendary collection',
+          image: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Punk+5678',
+          animation_url: '',
+          external_url: '',
+          attributes: [],
+        }),
+        icrc97: {
+          name: 'CryptoPunk #5678',
+          description: 'A classic CryptoPunk from the legendary collection',
+          image: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Punk+5678',
+          animation_url: '',
+          external_url: '',
+          attributes: [],
+        },
+      },
+      tokenId: BigInt(2),
     },
     owner: { toText: () => 'test-principal' } as any,
     image: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Punk+5678',
@@ -151,21 +193,36 @@ const mockSelectedICNFTs = [
   },
 ];
 
-// Basic export wizard
+// Basic export wizard - starts at IC NFT selection (with mocked wallet for demos)
 export const Default: Story = {
   args: {
     sourceCanisterId: 'umunu-kh777-77774-qaaca-cai',
     supportedNetworks: ['ethereum', 'polygon', 'arbitrum'],
+    mockWalletConnected: true,
     modal: false,
   },
 };
 
-// With wallet connected
-export const WalletConnected: Story = {
+// EVM Connection Step - shows wallet connection interface
+export const EVMConnectionStep: Story = {
   args: {
     sourceCanisterId: 'umunu-kh777-77774-qaaca-cai',
     supportedNetworks: ['ethereum', 'polygon', 'arbitrum'],
     mockWalletConnected: true,
+    mockSelectedICNFTs,
+    initialStep: 'connect',
+    modal: false,
+  },
+};
+
+// Wallet Not Connected - shows connection prompt
+export const WalletNotConnected: Story = {
+  args: {
+    sourceCanisterId: 'umunu-kh777-77774-qaaca-cai',
+    supportedNetworks: ['ethereum', 'polygon', 'arbitrum'],
+    mockWalletConnected: false,
+    mockSelectedICNFTs,
+    initialStep: 'connect',
     modal: false,
   },
 };
@@ -278,6 +335,7 @@ export const ModalVersion: Story = {
     sourceCanisterId: 'umunu-kh777-77774-qaaca-cai',
     supportedNetworks: ['ethereum', 'polygon', 'arbitrum'],
     mockWalletConnected: true,
+    mockSelectedICNFTs,
     modal: true,
   },
 };
@@ -288,6 +346,7 @@ export const LimitedNetworks: Story = {
     sourceCanisterId: 'umunu-kh777-77774-qaaca-cai',
     supportedNetworks: ['ethereum'],
     mockWalletConnected: true,
+    mockSelectedICNFTs,
     initialStep: 'remote-contract',
     modal: false,
   },
