@@ -73,12 +73,58 @@ export function ReturnCostStep({
   const { user } = useAuth();
   const anonAgent = useAnonAgent();
   
-  // Get orchestrator mutations for burn funding address
-  const orchestratorCanisterId = process.env.REACT_APP_ORCHESTRATOR_CANISTER_ID || 'vg3po-ix777-77774-qaafa-cai';
+  // Get orchestrator mutations for burn funding address - with extensive validation and logging
+  const orchestratorCanisterId = (() => {
+    const envValue = process.env.REACT_APP_ORCHESTRATOR_CANISTER_ID;
+    console.log('🔍 Orchestrator env value:', { envValue, type: typeof envValue });
+    
+    if (!envValue) {
+      console.log('⚠️ REACT_APP_ORCHESTRATOR_CANISTER_ID is not set, using fallback');
+      return 'bkyz2-fmaaa-aaaaa-qaaaq-cai';
+    }
+    
+    if (typeof envValue !== 'string') {
+      console.warn('⚠️ REACT_APP_ORCHESTRATOR_CANISTER_ID is not a string:', envValue);
+      return 'bkyz2-fmaaa-aaaaa-qaaaq-cai';
+    }
+    
+    const trimmed = envValue.trim();
+    if (trimmed === '') {
+      console.log('⚠️ REACT_APP_ORCHESTRATOR_CANISTER_ID is empty after trim');
+      return 'bkyz2-fmaaa-aaaaa-qaaaq-cai';
+    }
+    
+    console.log('✅ Using orchestrator canister ID:', trimmed);
+    return trimmed;
+  })();
   const mutations = use99Mutations(orchestratorCanisterId);
   
-  // Cycles token for balance checks
-  const cyclesTokenCanisterId = process.env.REACT_APP_CYCLES_LEDGER_CANISTER_ID || 'um5iw-rqaaa-aaaaq-qaaba-cai';
+  // Cycles token for balance checks - with extensive validation and logging
+  const cyclesTokenCanisterId = (() => {
+    const envValue = process.env.REACT_APP_CYCLES_LEDGER_CANISTER_ID;
+    console.log('🔍 Cycles ledger env value:', { envValue, type: typeof envValue });
+    
+    if (!envValue) {
+      console.log('⚠️ REACT_APP_CYCLES_LEDGER_CANISTER_ID is not set, using fallback');
+      return 'um5iw-rqaaa-aaaaq-qaaba-cai';
+    }
+    
+    if (typeof envValue !== 'string') {
+      console.warn('⚠️ REACT_APP_CYCLES_LEDGER_CANISTER_ID is not a string:', envValue);
+      return 'um5iw-rqaaa-aaaaq-qaaba-cai';
+    }
+    
+    const trimmed = envValue.trim();
+    if (trimmed === '') {
+      console.log('⚠️ REACT_APP_CYCLES_LEDGER_CANISTER_ID is empty after trim');
+      return 'um5iw-rqaaa-aaaaq-qaaba-cai';
+    }
+    
+    console.log('✅ Using cycles canister ID:', trimmed);
+    return trimmed;
+  })();
+  
+  console.log('🔍 About to call useFungibleToken with:', cyclesTokenCanisterId);
   const cyclesToken = useFungibleToken(cyclesTokenCanisterId);
   
   // User account for balance queries
@@ -91,7 +137,7 @@ export function ReturnCostStep({
   const balanceQuery = cyclesToken.useBalance(userAccount);
 
   // Allowance query for ckNFT canister (when we have a selected ckNFT)
-  const ckNFTCanisterId = selectedCkNFTs.length > 0 ? Principal.fromText(selectedCkNFTs[0].canisterId) : null;
+  const ckNFTCanisterId = selectedCkNFTs && selectedCkNFTs.length > 0 ? Principal.fromText(selectedCkNFTs[0].canisterId) : null;
   const allowanceParams = userAccount && ckNFTCanisterId ? {
     account: userAccount,
     spender: { owner: ckNFTCanisterId, subaccount: [] as [] }
@@ -601,7 +647,7 @@ export function ReturnCostStep({
         console.log(`📋 Cast cost request for NFT ${nft.tokenId}:`, {
           tokenId: nft.tokenId,
           contract: targetContract,
-          network: 'Ethereum' in targetNetwork ? `Ethereum (${targetNetwork.Ethereum[0] || 'Mainnet'})` : 'Other Network',
+          network: 'Ethereum' in targetNetwork ? `Ethereum (${targetNetwork.Ethereum?.[0] || 'Mainnet'})` : 'Other Network',
         });
         const castCostResult = await ckNFTActor.icrc99_cast_cost(castCostRequest);
 
@@ -661,7 +707,7 @@ export function ReturnCostStep({
         totalCyclesCost: returnCosts.cyclesCost.toString(),
         totalEthCost: returnCosts.ethCost.toString(),
         totalGasEstimate: returnCosts.gasEstimate.toString(),
-        targetNetwork: 'Ethereum' in returnCosts.targetNetwork ? `Ethereum (${returnCosts.targetNetwork.Ethereum[0] || 'Mainnet'})` : 'Other Network',
+        targetNetwork: 'Ethereum' in returnCosts.targetNetwork ? `Ethereum (${returnCosts.targetNetwork.Ethereum?.[0] || 'Mainnet'})` : 'Other Network',
         targetContract: returnCosts.targetContract,
         burnFundingAddress: returnCosts.burnFundingAddress,
         hasBurnAddress: !!returnCosts.burnFundingAddress,
@@ -1071,7 +1117,7 @@ export function ReturnCostStep({
               <div>
                 <span className="text-yellow-600">Target Network:</span>
                 <span className="ml-2 text-yellow-800">
-                  {'Ethereum' in costs.targetNetwork ? `Ethereum (${costs.targetNetwork.Ethereum[0] || 'Mainnet'})` : 'Other Network'}
+                  {'Ethereum' in costs.targetNetwork ? `Ethereum (${costs.targetNetwork.Ethereum?.[0] || 'Mainnet'})` : 'Other Network'}
                 </span>
               </div>
               <div>

@@ -108,7 +108,7 @@ export function EVMImportWizard({
   const { user } = useAuth();
 
   // ICRC-99 mutations for bridge operations - now safe to call without authentication
-  const mutations = use99Mutations(process.env.ICRC99_ORCHESTRATOR_CANISTER_ID || 'vg3po-ix777-77774-qaafa-cai');
+  const mutations = use99Mutations(process.env.ICRC99_ORCHESTRATOR_CANISTER_ID || 'uzt4z-lp777-77774-qaabq-cai');
   
   // Create contract pointer for bridge operations - use target network when available
   const contractPointer: ContractPointer | null = useMemo(() => {
@@ -867,6 +867,7 @@ export function EVMImportWizard({
       case 'gas':
         return (
           <NFTMintEstimationStep
+            networkSource="evm"
             selectedNFTs={selectedNFTs}
             mintCosts={mintCosts}
             onMintCostsCalculated={setMintCosts}

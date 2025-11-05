@@ -2,8 +2,8 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useMetaMask } from '../../hooks/useEVM';
-import { useAuth } from '../../hooks/useAuth';
-import { use99Mutations } from '../../hooks/use99Mutations';
+// import { useAuth } from '../../hooks/useAuth';
+// import { use99Mutations } from '../../hooks/use99Mutations';
 import { BridgeProgress, BridgeDirection, createBridgeProgress, updateBridgeStep } from '../../lib/bridgeProgress';
 import type { Network } from '../../declarations/orchestrator/orchestrator.did';
 
@@ -54,6 +54,10 @@ export interface EVMBurnWizardProps {
   modal?: boolean;
   /** Mock burn result for testing */
   mockBurnResult?: BurnResult;
+  /** Mock wallet connection state (for demos/testing) */
+  mockWalletConnected?: boolean;
+  /** Mock selected NFTs (for demos/testing) */
+  mockSelectedNFTs?: SelectedNFT[];
 }
 
 export function EVMBurnWizard({
@@ -66,6 +70,8 @@ export function EVMBurnWizard({
   className,
   modal = true,
   mockBurnResult,
+  mockWalletConnected,
+  mockSelectedNFTs,
 }: EVMBurnWizardProps) {
   // Network name to chain ID mapping
   const networkToChainId = {
@@ -94,9 +100,9 @@ export function EVMBurnWizard({
 
   // Wizard state
   const [currentStep, setCurrentStep] = useState<BurnWizardStep>('connect');
-  const [selectedNFTs, setSelectedNFTs] = useState<SelectedNFT[]>([]);
+  const [selectedNFTs, setSelectedNFTs] = useState<SelectedNFT[]>(mockSelectedNFTs || []);
   const [burnCosts, setBurnCosts] = useState<BurnCosts | null>(null);
-  const [burnTxHash, setBurnTxHash] = useState<string | null>(null);
+  const [_burnTxHash, setBurnTxHash] = useState<string | null>(null);
   const [progress, setProgress] = useState<BridgeProgress | null>(null);
   const [burnResult, setBurnResult] = useState<BurnResult | null>(mockBurnResult || null);
 
@@ -114,7 +120,14 @@ export function EVMBurnWizard({
 
   // Hooks
   const { activeAddress, isUnlocked, connectWallet, switchChain, chainId } = useMetaMask();
-  const { user } = useAuth();
+  // const { user } = useAuth();
+
+  // Override wallet state for mocking
+  const effectiveIsConnected = mockWalletConnected !== undefined ? mockWalletConnected : isUnlocked;
+  const effectiveAccount = mockWalletConnected !== undefined 
+    ? (mockWalletConnected ? '0x742d35Cc6635C0532925a3b8D11e432f1b7C4b7b' : null)
+    : activeAddress;
+  const effectiveChainId = mockWalletConnected ? 1 : chainId; // Default to Ethereum mainnet for mocked wallet
 
   // Initialize with provided values if available
   useEffect(() => {
@@ -139,8 +152,8 @@ export function EVMBurnWizard({
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
 
   // Get mutations
-  const orchestratorCanisterId = process.env.ICRC99_ORCHESTRATOR_CANISTER_ID || 'vg3po-ix777-77774-qaafa-cai';
-  const mutations = use99Mutations(orchestratorCanisterId);
+  // const orchestratorCanisterId = process.env.ICRC99_ORCHESTRATOR_CANISTER_ID || 'vg3po-ix777-77774-qaafa-cai';
+  // const mutations = use99Mutations(orchestratorCanisterId);
 
   // Progress management
   const createBurnProgressState = useCallback((direction: BridgeDirection) => {
@@ -266,10 +279,10 @@ export function EVMBurnWizard({
       case 'connect':
         return (
           <EVMConnectionStep
-            isConnected={!!activeAddress && isUnlocked}
-            account={activeAddress}
+            isConnected={effectiveIsConnected}
+            account={effectiveAccount}
             supportedNetworks={supportedNetworks}
-            currentNetwork={chainId ? chainIdToNetwork[chainId] || null : null}
+            currentNetwork={effectiveChainId ? chainIdToNetwork[effectiveChainId] || null : null}
             onConnect={connectWallet}
             onSwitchNetwork={(network) => {
               const chainId = networkToChainId[network as keyof typeof networkToChainId];
@@ -295,8 +308,8 @@ export function EVMBurnWizard({
         return (
           <NFTSelectionStep
             mode="burn"
-            account={activeAddress!}
-            network={chainId ? chainIdToNetwork[chainId] || null : null}
+            account={effectiveAccount!}
+            network={effectiveChainId ? chainIdToNetwork[effectiveChainId] || null : null}
             selectedNFTs={selectedNFTs}
             onSelectionChange={setSelectedNFTs}
             nftDiscoveryService={nftDiscoveryService}

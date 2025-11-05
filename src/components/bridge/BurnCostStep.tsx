@@ -400,7 +400,7 @@ export function BurnCostStep({
         
         // Create anonymous agent for cost queries
         const agent = new HttpAgent({ 
-          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://ic0.app' 
+          host: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://icp0.io' 
         });
         
         if (process.env.NODE_ENV === 'development') {

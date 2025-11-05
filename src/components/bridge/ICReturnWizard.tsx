@@ -938,6 +938,7 @@ export function ICReturnWizard({
               // Handle canister change if needed
               console.log('Canister changed to:', canisterId);
             }}
+            targetChain='evm'
           />
         );
 

@@ -287,7 +287,7 @@ export function NFTSelectionStep({
         
         // Create anonymous agent
         const agent = new HttpAgent({
-          host: process.env.DFX_NETWORK === 'local' ? 'http://localhost:8080' : 'https://ic0.app',
+          host: process.env.DFX_NETWORK === 'local' ? 'http://localhost:8080' : 'https://icp0.io',
         });
         
         // Only fetch root key in local development

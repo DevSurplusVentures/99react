@@ -7,6 +7,7 @@ import { useNFTOwnerOf } from '../../hooks/useNFTOwnerOf';
 import { useNFTMetadata } from '../../hooks/useNFTMetadata';
 import type { Account } from '../../core/Account';
 import { NFTMetadata } from '../../lib';
+import { solanaMintFromTokenId } from '../../utils/solanaTokenId';
 
 export interface ICNFTSelectionStepProps {
   /** Source canister ID to fetch NFTs from */
@@ -19,6 +20,8 @@ export interface ICNFTSelectionStepProps {
   userPrincipal?: Principal;
   /** Callback when the canister ID changes */
   onCanisterChange?: (canisterId: string) => void;
+  /** Target chain type for context-aware messaging */
+  targetChain?: 'evm' | 'solana' | 'ic';
 }
 
 interface OwnedNFT {
@@ -29,6 +32,20 @@ interface OwnedNFT {
   name?: string;
   description?: string;
   attributes?: Array<{ trait_type: string; value: string }>;
+}
+
+/**
+ * Helper function to convert token ID to Solana mint address
+ * Returns the base58 address if conversion succeeds, otherwise null
+ */
+function tryConvertToSolanaMint(tokenId: string): string | null {
+  try {
+    const tokenIdBigInt = BigInt(tokenId);
+    return solanaMintFromTokenId(tokenIdBigInt);
+  } catch (error) {
+    // Not a valid Solana token ID, return null
+    return null;
+  }
 }
 
 // NFT metadata fetcher component for a single NFT
@@ -72,6 +89,7 @@ export function ICNFTSelectionStep({
   onSelectionChange,
   userPrincipal,
   onCanisterChange,
+  targetChain = 'evm', // Default to EVM for backward compatibility
 }: ICNFTSelectionStepProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +101,31 @@ export function ICNFTSelectionStep({
   const [inputCanisterId, setInputCanisterId] = useState(sourceCanisterId || '');
   const [activeCanisterId, setActiveCanisterId] = useState(sourceCanisterId || '');
   const [canisterIdError, setCanisterIdError] = useState<string | null>(null);
+
+  // Helper function to get context-aware messaging
+  const getTargetChainLabel = useCallback(() => {
+    switch (targetChain) {
+      case 'solana':
+        return 'Solana';
+      case 'ic':
+        return 'IC';
+      case 'evm':
+      default:
+        return 'EVM';
+    }
+  }, [targetChain]);
+
+  const getOperationLabel = useCallback(() => {
+    switch (targetChain) {
+      case 'solana':
+        return 'return';
+      case 'ic':
+        return 'return';
+      case 'evm':
+      default:
+        return 'export';
+    }
+  }, [targetChain]);
 
   // Validate and set canister ID
   const validateAndSetCanisterId = useCallback((canisterId: string) => {
@@ -515,7 +558,7 @@ export function ICNFTSelectionStep({
               {selectedNFTs.length > 0 && (
                 <div className="text-right">
                   <p className="text-sm text-blue-600">
-                    Ready for export to EVM
+                    Ready for {getOperationLabel()} to {getTargetChainLabel()}
                   </p>
                 </div>
               )}
@@ -530,6 +573,7 @@ export function ICNFTSelectionStep({
                 nft={nft}
                 selected={isSelected(nft)}
                 onToggle={() => toggleSelection(nft)}
+                operationLabel={getOperationLabel()}
               />
             ))}
           </div>
@@ -558,10 +602,12 @@ function NFTCard({
   nft,
   selected,
   onToggle,
+  operationLabel,
 }: {
   nft: OwnedNFT;
   selected: boolean;
   onToggle: () => void;
+  operationLabel: string;
 }) {
   const [imageError, setImageError] = useState(false);
 
@@ -591,7 +637,20 @@ function NFTCard({
         )}
         
         <p className="font-medium text-sm truncate">{nft.name || `NFT #${nft.tokenId}`}</p>
-        <p className="text-xs text-gray-600">#{nft.tokenId}</p>
+        
+        {/* Try to display as Solana mint address, fallback to token ID */}
+        {(() => {
+          const mintAddress = tryConvertToSolanaMint(nft.tokenId);
+          if (mintAddress) {
+            return (
+              <p className="text-xs text-gray-600 font-mono truncate" title={mintAddress}>
+                {mintAddress.slice(0, 4)}...{mintAddress.slice(-4)}
+              </p>
+            );
+          } else {
+            return <p className="text-xs text-gray-600">#{nft.tokenId}</p>;
+          }
+        })()}
         
         {nft.description && (
           <p className="text-xs text-gray-500 mt-1 line-clamp-2">{nft.description}</p>
@@ -615,7 +674,7 @@ function NFTCard({
         )}
         
         {selected && (
-          <div className="mt-2 text-xs font-medium text-blue-600">✓ Selected for export</div>
+          <div className="mt-2 text-xs font-medium text-blue-600">✓ Selected for {operationLabel}</div>
         )}
       </button>
     </div>

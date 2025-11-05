@@ -178,7 +178,18 @@ export function EVMExportWizard({
 
   // Override wallet state for mocking
   const effectiveIsConnected = mockWalletConnected !== undefined ? mockWalletConnected : isUnlocked;
-  const effectiveAccount = mockWalletConnected ? '0x742d35Cc6635C0532925a3b8D11e432f1b7C4b7b' : activeAddress;
+  const effectiveAccount = mockWalletConnected !== undefined 
+    ? (mockWalletConnected ? '0x742d35Cc6635C0532925a3b8D11e432f1b7C4b7b' : null)
+    : activeAddress;
+  
+  // Debug logging for mocking
+  console.log('🔍 EVMExportWizard wallet state:', {
+    mockWalletConnected,
+    isUnlocked,
+    effectiveIsConnected,
+    effectiveAccount,
+    currentStep,
+  });
 
   // Progress management functions
   const createExportProgressState = useCallback((direction: BridgeDirection) => {
@@ -997,6 +1008,7 @@ export function EVMExportWizard({
               onSelectionChange={setSelectedICNFTs}
               userPrincipal={user?.principal}
               onCanisterChange={setActiveCanisterId}
+              targetChain='evm'
             />
             
             {/* Show ICRC-99 support status when canister is loaded */}

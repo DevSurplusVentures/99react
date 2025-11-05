@@ -1171,7 +1171,7 @@ export function ExportCostsStep({
           </p>
           <div className="mt-3">
             <button
-              onClick={() => window.open('https://nns.ic0.app/wallet/', '_blank')}
+              onClick={() => window.open('https://nns.icp0.io/wallet/', '_blank')}
               className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors"
             >
               Get More Cycles

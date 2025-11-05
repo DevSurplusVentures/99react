@@ -2,14 +2,24 @@ import { useState, useEffect, useMemo } from 'react';
 import { Principal } from '@dfinity/principal';
 import clsx from 'clsx';
 import { useMetaMask } from '../../hooks/useEVM';
+import { useSolana } from '../../hooks/useSolana';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrchestratorAllowance, use99Mutations } from '../../hooks/use99Mutations';
 import { useFungibleToken } from '../../hooks/useFungibleToken';
+import { createSolanaNetwork } from '../../types/solana';
+import { solanaTokenIdFromMint } from '../../utils/solanaTokenId';
 import type { SelectedNFT } from './NFTSelectionStep';
+import type { SelectedSolanaNFT } from './SolanaNFTSelectionStep';
+
+export type NetworkSource = 'evm' | 'solana';
 
 export interface NFTMintEstimationStepProps {
-  /** Selected NFTs to calculate mint costs for */
-  selectedNFTs: SelectedNFT[];
+  /** Network source: 'evm' for Ethereum/EVM chains, 'solana' for Solana */
+  networkSource: NetworkSource;
+  /** Selected NFTs to calculate mint costs for (EVM) */
+  selectedNFTs?: SelectedNFT[];
+  /** Selected Solana NFTs to calculate mint costs for */
+  selectedSolanaNFTs?: SelectedSolanaNFT[];
   /** Current calculated mint costs */
   mintCosts: bigint | null;
   /** Callback when mint costs are calculated */
@@ -17,12 +27,40 @@ export interface NFTMintEstimationStepProps {
 }
 
 export function NFTMintEstimationStep({
-  selectedNFTs,
+  networkSource,
+  selectedNFTs = [],
+  selectedSolanaNFTs = [],
   mintCosts,
   onMintCostsCalculated,
 }: NFTMintEstimationStepProps) {
+  // Conditionally use network-specific hooks
   const { chainId } = useMetaMask();
+  
+  // Safely use Solana hook - it may not be available in all contexts (e.g., Storybook)
+  let solanaWallet;
+  try {
+    solanaWallet = useSolana();
+  } catch (error) {
+    console.warn('Solana wallet provider not available:', error);
+    solanaWallet = undefined;
+  }
+  
   const { user } = useAuth();
+  
+  // Safely access cluster with fallback
+  const cluster = solanaWallet?.cluster ?? 'devnet';
+  
+  // Determine the active NFT list based on network source
+  const activeNFTs = networkSource === 'evm' ? selectedNFTs : selectedSolanaNFTs;
+  const nftCount = activeNFTs.length;
+  
+  // Theme colors based on network source
+  const themeColor = networkSource === 'evm' ? 'blue' : 'purple';
+  const bgColor = networkSource === 'evm' ? 'bg-blue-50' : 'bg-purple-50';
+  const borderColor = networkSource === 'evm' ? 'border-blue-200' : 'border-purple-200';
+  const textColor = networkSource === 'evm' ? 'text-blue-800' : 'text-purple-800';
+  const primaryBtnColor = networkSource === 'evm' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700';
+  const primaryRingColor = networkSource === 'evm' ? 'focus:ring-blue-500' : 'focus:ring-purple-500';
   
   // Use the enhanced fungible token hook for cycles ledger
   const CYCLES_LEDGER_CANISTER_ID = process.env.CYCLES_LEDGER_CANISTER_ID || 'um5iw-rqaaa-aaaaq-qaaba-cai';
@@ -58,26 +96,48 @@ export function NFTMintEstimationStep({
   };
 
   // ICRC-99 mutations for getting mint costs
-  const mutations = use99Mutations(process.env.ICRC99_ORCHESTRATOR_CANISTER_ID || 'vg3po-ix777-77774-qaafa-cai');
+  const mutations = use99Mutations(process.env.ICRC99_ORCHESTRATOR_CANISTER_ID || 'uzt4z-lp777-77774-qaabq-cai');
 
   // Create mint requests for cost estimation
   const mintRequests = useMemo(() => {
-    if (selectedNFTs.length === 0 || !user?.principal) return [];
+    if (nftCount === 0 || !user?.principal) return [];
     
-    const effectiveChainId = chainId ?? 1;
-    const network = { Ethereum: [BigInt(effectiveChainId)] as [bigint] };
+    // Create network variant based on source
+    let network;
+    if (networkSource === 'evm') {
+      const effectiveChainId = chainId ?? 1;
+      network = { Ethereum: [BigInt(effectiveChainId)] as [bigint] };
+    } else {
+      // Use createSolanaNetwork to get proper SolanaCluster variant
+      const effectiveCluster = cluster ?? 'devnet';
+      network = createSolanaNetwork(effectiveCluster);
+    }
 
-    return selectedNFTs.map(nft => ({
-      nft: {
-        tokenId: BigInt(nft.tokenId),
-        contract: nft.contractAddress,
-        network,
-      },
-      resume: [] as [],
-      mintToAccount: { owner: user.principal!, subaccount: [] as [] },
-      spender: [] as [],
-    }));
-  }, [selectedNFTs, chainId, user?.principal]);
+    // Map NFTs to mint requests based on network source
+    if (networkSource === 'evm') {
+      return selectedNFTs.map(nft => ({
+        nft: {
+          tokenId: BigInt(nft.tokenId),
+          contract: nft.contractAddress,
+          network,
+        },
+        resume: [] as [],
+        mintToAccount: { owner: user.principal!, subaccount: [] as [] },
+        spender: [] as [],
+      }));
+    } else {
+      return selectedSolanaNFTs.map(nft => ({
+        nft: {
+          tokenId: solanaTokenIdFromMint(nft.mintAddress), // Convert Solana mint address to BigInt
+          contract: nft.collection?.address || nft.mintAddress, // Use collection address as contract
+          network,
+        },
+        resume: [] as [],
+        mintToAccount: { owner: user.principal!, subaccount: [] as [] },
+        spender: [] as [],
+      }));
+    }
+  }, [networkSource, nftCount, chainId, cluster, selectedNFTs, selectedSolanaNFTs, user?.principal]);
 
   // Get mint cost estimation
   const [isGettingMintCost, setIsGettingMintCost] = useState(false);
@@ -149,8 +209,8 @@ export function NFTMintEstimationStep({
 
       {isLoading ? (
         <div className="text-center py-8">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Calculating mint costs for {selectedNFTs.length} NFT{selectedNFTs.length !== 1 ? 's' : ''}...</p>
+          <div className={clsx("animate-spin w-8 h-8 border-4 border-t-transparent rounded-full mx-auto mb-4", `border-${themeColor}-600`)}></div>
+          <p className="text-gray-600">Calculating mint costs for {nftCount} NFT{nftCount !== 1 ? 's' : ''}...</p>
         </div>
       ) : displayCost ? (
         <div className="space-y-4">
@@ -158,7 +218,7 @@ export function NFTMintEstimationStep({
           <div className="p-4 border border-gray-200 rounded-lg">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-700">Total Mint Cost ({selectedNFTs.length} NFT{selectedNFTs.length !== 1 ? 's' : ''})</span>
+                <span className="text-gray-700">Total Mint Cost ({nftCount} NFT{nftCount !== 1 ? 's' : ''})</span>
                 <div className="text-right">
                   <span className="font-medium">{formatCycles(displayCost)} Cycles</span>
                   <p className="text-xs text-gray-500">≈ {cyclesToICP(displayCost)} ICP</p>
@@ -166,11 +226,11 @@ export function NFTMintEstimationStep({
               </div>
               
               {/* Per NFT breakdown */}
-              {selectedNFTs.length > 1 && (
+              {nftCount > 1 && (
                 <div className="text-xs text-gray-600 border-t pt-2">
                   <div className="flex justify-between">
                     <span>Per NFT Cost:</span>
-                    <span className="font-mono">≈ {formatCycles(displayCost / BigInt(selectedNFTs.length))} Cycles</span>
+                    <span className="font-mono">≈ {formatCycles(displayCost / BigInt(nftCount))} Cycles</span>
                   </div>
                 </div>
               )}
@@ -289,8 +349,8 @@ export function NFTMintEstimationStep({
                     onClick={async () => {
                       if (!displayCost) return;
                       try {
-                        const orchestratorPrincipal = Principal.fromText(process.env.ICRC99_ORCHESTRATOR_CANISTER_ID || 'vg3po-ix777-77774-qaafa-cai');
-                        const approvalAmount = (displayCost * BigInt(110)) / BigInt(100); // 110% of required
+                        const orchestratorPrincipal = Principal.fromText(process.env.ICRC99_ORCHESTRATOR_CANISTER_ID || 'uzt4z-lp777-77774-qaabq-cai');
+                        const approvalAmount = (displayCost * BigInt(120)) / BigInt(100); // 120% of required (matches bridge execution)
                         const expiresAt = BigInt(Date.now() * 1000000) + BigInt(24 * 60 * 60 * 1000000000); // 1 day
                         
                         await approveMutation.mutateAsync({
@@ -315,7 +375,7 @@ export function NFTMintEstimationStep({
                       "w-full px-3 py-2 text-sm rounded-md font-medium transition-colors",
                       isLoadingApprove
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        : `${primaryBtnColor} text-white focus:outline-none focus:ring-2 ${primaryRingColor} focus:ring-offset-2`
                     )}
                   >
                     {isLoadingApprove ? (
@@ -342,8 +402,8 @@ export function NFTMintEstimationStep({
             </div>
           </div>
 
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
+          <div className={clsx("p-4 border rounded-lg", bgColor, borderColor)}>
+            <p className={clsx("text-sm", textColor)}>
               <strong>About NFT minting costs:</strong> Each NFT requires cycles to mint on the Internet Computer. 
               This covers the computational cost of creating the NFT, storing metadata, and updating the canister state.
             </p>

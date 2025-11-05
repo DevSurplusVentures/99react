@@ -175,8 +175,14 @@ export function RemoteContractStep({
   );
 
   // Create Network object from chain ID - memoize to prevent infinite loops
-  const targetNetwork: Network = useMemo(() => {
-    return { Ethereum: [BigInt(targetChainId)] };
+  const targetNetwork: Network | null = useMemo(() => {
+    if (!targetChainId) return null;
+    try {
+      return { Ethereum: [BigInt(targetChainId)] };
+    } catch (error) {
+      console.error('Failed to convert targetChainId to BigInt:', targetChainId, error);
+      return null;
+    }
   }, [targetChainId]);
 
   console.log('🔍 Contract check state:', {
@@ -191,7 +197,7 @@ export function RemoteContractStep({
   // Check for existing contract when network or canister changes - following App.tsx pattern
   useEffect(() => {
     const checkForExistingContract = async () => {
-      if (!targetChainId || !sourceCanisterId || !unauthenticatedOrchActor || !sourceContractPointer) {
+      if (!targetChainId || !sourceCanisterId || !unauthenticatedOrchActor || !sourceContractPointer || !targetNetwork) {
         setExistingContract(null);
         setContractCheckComplete(false);
         return;
@@ -317,7 +323,7 @@ export function RemoteContractStep({
     }
 
     const estimateRemoteContractCosts = async () => {
-      if (!unauthenticatedOrchActor || !sourceCanisterId || !targetChainId || isCheckingContract || !contractCheckComplete || !sourceContractPointer) {
+      if (!unauthenticatedOrchActor || !sourceCanisterId || !targetChainId || isCheckingContract || !contractCheckComplete || !sourceContractPointer || !targetNetwork) {
         return;
       }
 
@@ -486,7 +492,7 @@ export function RemoteContractStep({
         }
 
         // Check if the orchestrator now recognizes the new contract using get_remote
-        if (unauthenticatedOrchActor && sourceCanisterId && targetChainId) {
+        if (unauthenticatedOrchActor && sourceCanisterId && targetChainId && targetNetwork) {
           try {
             // First get the ckNFT canister ID
             const contractPointer = {
@@ -596,7 +602,7 @@ export function RemoteContractStep({
 
   // Create remote contract
   const createRemote = async () => {
-    if (!user?.principal || !authenticatedOrchActor || !targetChainId || !sourceCanisterId || !sourceContractPointer) {
+    if (!user?.principal || !authenticatedOrchActor || !targetChainId || !sourceCanisterId || !sourceContractPointer || !targetNetwork) {
       console.error('Missing required information for remote creation');
       return;
     }
