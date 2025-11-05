@@ -27,7 +27,24 @@ type Stats =
    owner: principal;
    tt: Stats__1;
  };
-type SolonaRPCService = variant {Generic: RpcApi;};
+type SolanaRPCService = 
+ variant {
+   Custom: record {
+             headers: opt vec record {
+                                text;
+                                text;
+                              };
+             url: text;
+           };
+   Provider: nat;
+ };
+type SolanaCluster = 
+ variant {
+   Custom: text;
+   Devnet;
+   Mainnet;
+   Testnet;
+ };
 type SendRawTransactionStatus = 
  variant {
    InsufficientFunds;
@@ -74,6 +91,16 @@ type RpcApi =
    headers: opt vec HttpHeader;
    url: text;
  };
+type Result_1 = 
+ variant {
+   err: text;
+   ok;
+ };
+type Result = 
+ variant {
+   err: RemoteError;
+   ok: text;
+ };
 type RemoteNFTPointer = 
  record {
    contract: text;
@@ -102,6 +129,14 @@ type RemoteError =
     variant {
       Ethereum: RpcError;
       EthereumMultiSend: MultiSendRawTransactionResult;
+      Solana:
+       variant {
+         InvalidMint: text;
+         MetadataNotFound: text;
+         NetworkError: text;
+         ParseError: text;
+         TokenAccountNotFound: text;
+       };
     };
    Unauthorized;
  };
@@ -156,59 +191,66 @@ type OrchestratorConfig =
                 Remove;
               };
       network: Network;
-      "service": FusionRPCService__1;
+      "service": FusionRPCService;
     };
    SetEthTecdsaKeyName: text;
    SetSolanaSchnorrKeyName: text;
  };
 type OrchestratorActor = 
  service {
-   calc_eth_call_cycles: (RpcServices, nat, text) -> (nat) query;
-   cast: (CastRequest) -> (CastResult);
-   configure: (vec OrchestratorConfig) -> (vec opt OrchestratorConfigResult);
-   create_canister: (ContractPointer, CanisterDefaults, opt Account) ->
-    (CreateCanisterResponse);
-   create_remote: (ContractPointer, Network, nat, nat, nat, opt Account) ->
+   add_approved_wasm_hash: (hash: blob) -> (Result_1);
+   calc_eth_call_cycles: (rpcs: RpcServices, maxBytes: nat, callText:
+    text) -> (nat) query;
+   cast: (request: CastRequest) -> (CastResult);
+   configure: (configs: vec OrchestratorConfig) ->
+    (vec opt OrchestratorConfigResult);
+   create_canister: (pointer: ContractPointer, defaults: CanisterDefaults,
+    account: opt Account) -> (CreateCanisterResponse);
+   create_remote: (pointer: ContractPointer, network: Network, gasPrice: 
+    nat, gasLimit: nat, maxPriorityFeePerGas: nat, account: opt Account) ->
     (CreateRemoteResponse);
-   forceCkNFTCaniser: (ContractPointer__1, principal) -> ();
-   get_cast_status: (vec nat) -> (vec opt CastStatus) query;
-   get_ck_nft_canister: (vec ContractPointer) -> (vec opt principal) query;
-   get_creation_cost: (ContractPointer) -> (nat);
-   get_icrc99_address: (principal, Network) -> (opt text);
-   get_mint_cost: (vec MintRequest) -> (vec opt nat) query;
-   get_mint_status: (vec nat) -> (vec opt MintStatus) query;
-   get_remote: (vec record {
-                      principal;
-                      Network__2;
-                    }) -> (vec opt ContractStateShared__1) query;
-   get_remote_approval_address: (ApprovalAddressRequest, opt Account) ->
-    (opt text);
-   get_remote_cost: (ContractPointer, Network) -> (nat) query;
-   get_remote_meta: (vec RemoteNFTPointer, vec nat, opt Account__1) ->
-    (vec opt GetCallResult);
-   get_remote_owner: (vec RemoteNFTPointer, opt Account__1) ->
-    (vec opt GetCallResult);
-   get_remote_status: (vec nat) -> (vec opt ContractStateShared__1) query;
+   forceCkNFTCaniser: (contract: ContractPointer, "principal": principal) ->
+    ();
+   forceNonceForApprovalHash: (caller: principal, remote: RemoteNFTPointer,
+    account: Account, nonce: nat) -> ();
+   forceNonceForIcrc99Canister: ("principal": principal, network: Network,
+    nonce: nat) -> ();
+   get_approved_wasm_hashes: () -> (vec blob);
+   get_cast_status: (request: vec nat) -> (vec opt CastStatus) query;
+   get_ck_nft_canister: (pointer: vec ContractPointer) ->
+    (vec opt principal) query;
+   get_collection_name: (pointers: vec RemoteNFTPointer, account:
+    opt Account) -> (vec opt GetCallResult);
+   get_collection_symbol: (pointers: vec RemoteNFTPointer, account:
+    opt Account) -> (vec opt GetCallResult);
+   get_creation_cost: (pointer: ContractPointer) -> (nat);
+   get_icrc99_address: (caller: principal, network: Network) -> (opt text);
+   get_mint_cost: (requests: vec MintRequest) -> (vec opt nat) query;
+   get_mint_status: (request: vec nat) -> (vec opt MintStatus) query;
+   get_remote: (request: vec record {
+                               principal;
+                               Network;
+                             }) -> (vec opt ContractStateShared) query;
+   get_remote_approval_address: (pointer: ApprovalAddressRequest, account:
+    opt Account) -> (opt text);
+   get_remote_cost: (pointer: ContractPointer, network: Network) ->
+    (nat) query;
+   get_remote_meta: (pointers: vec RemoteNFTPointer, maxBytes: vec nat,
+    account: opt Account) -> (vec opt GetCallResult);
+   get_remote_owner: (pointers: vec RemoteNFTPointer, account:
+    opt Account) -> (vec opt GetCallResult);
+   get_remote_status: (request: vec nat) ->
+    (vec opt ContractStateShared) query;
    get_stats: () -> (Stats) query;
-   mint: (MintRequest, opt Account) -> (MintResult);
+   mint: (mintRequest: MintRequest, account: opt Account) -> (MintResult);
+   register_ic_native_canister: (canisterId: principal) -> (Result_1);
+   remove_approved_wasm_hash: (hash: blob) -> (Result_1);
+   send_balance: (ckNFTCanister: principal, value: nat, to: text, network:
+    Network, gasPrice: nat, gasLimit: nat, maxPriorityFeePerGas: nat) ->
+    (Result);
    system_upgrade: () -> ();
-   upgrade_ckNFT_canister: (principal) -> ();
- };
-type Network__2 = 
- variant {
-   Bitcoin: opt text;
-   Ethereum: opt nat;
-   IC: opt text;
-   Other: ICRC16Map;
-   Solana: opt nat;
- };
-type Network__1 = 
- variant {
-   Bitcoin: opt text;
-   Ethereum: opt nat;
-   IC: opt text;
-   Other: ICRC16Map;
-   Solana: opt nat;
+   test_schnorr: () -> (text);
+   upgrade_ckNFT_canister: ("principal": principal) -> ();
  };
 type Network = 
  variant {
@@ -216,7 +258,7 @@ type Network =
    Ethereum: opt nat;
    IC: opt text;
    Other: ICRC16Map;
-   Solana: opt nat;
+   Solana: opt SolanaCluster;
  };
 type MultiSendRawTransactionResult = 
  variant {
@@ -311,6 +353,14 @@ type MintError =
     variant {
       Ethereum: RpcError;
       EthereumMultiSend: MultiSendRawTransactionResult;
+      Solana:
+       variant {
+         InvalidMint: text;
+         MetadataNotFound: text;
+         NetworkError: text;
+         ParseError: text;
+         TokenAccountNotFound: text;
+       };
     };
    Unauthorized;
  };
@@ -356,29 +406,6 @@ type GetCallResult =
    Err: RemoteError;
    Ok: text;
  };
-type FusionRPCService__1 = 
- variant {
-   Bitcoin: record {
-              canisterId: principal;
-              rpc: BitcoinRPCService;
-            };
-   Ethereum: record {
-               canisterId: principal;
-               rpc: RpcService;
-             };
-   IC: record {
-         canisterId: principal;
-         rpc: ICRPCService;
-       };
-   Other: vec record {
-                text;
-                CandyShared;
-              };
-   Solana: record {
-             canisterId: principal;
-             rpc: SolonaRPCService;
-           };
- };
 type FusionRPCService = 
  variant {
    Bitcoin: record {
@@ -399,7 +426,7 @@ type FusionRPCService =
               };
    Solana: record {
              canisterId: principal;
-             rpc: SolonaRPCService;
+             rpc: SolanaRPCService;
            };
  };
 type EthSepoliaService = 
@@ -446,6 +473,14 @@ type CreateRemoteError =
     variant {
       Ethereum: RpcError;
       EthereumMultiSend: MultiSendRawTransactionResult;
+      Solana:
+       variant {
+         InvalidMint: text;
+         MetadataNotFound: text;
+         NetworkError: text;
+         ParseError: text;
+         TokenAccountNotFound: text;
+       };
     };
    Unauthorized;
  };
@@ -476,24 +511,16 @@ type CreateCanisterError =
     variant {
       Ethereum: RpcError;
       EthereumMultiSend: MultiSendRawTransactionResult;
+      Solana:
+       variant {
+         InvalidMint: text;
+         MetadataNotFound: text;
+         NetworkError: text;
+         ParseError: text;
+         TokenAccountNotFound: text;
+       };
     };
    Unauthorized;
- };
-type ContractStateShared__1 = 
- record {
-   address: opt text;
-   ckNFTCanisterId: opt nat;
-   confirmed: bool;
-   contractId: nat;
-   contractType: variant {
-                   Owned: ContractPointer;
-                   Remote;
-                 };
-   deploymentTrx: opt text;
-   network: opt Network;
-   nextQuery: opt nat;
-   retries: opt nat;
-   writingContractCanisterId: opt text;
  };
 type ContractStateShared = 
  record {
@@ -511,11 +538,6 @@ type ContractStateShared =
    retries: opt nat;
    writingContractCanisterId: opt text;
  };
-type ContractPointer__1 = 
- record {
-   contract: text;
-   network: Network;
- };
 type ContractPointer = 
  record {
    contract: text;
@@ -528,9 +550,9 @@ type CkNFTCanisterStateShared =
    lastCycles: nat;
    lastCyclesTimestamp: nat;
    nativeContract: Contract;
-   network: Network__1;
+   network: Network;
    networkMap: vec record {
-                     Network__1;
+                     Network;
                      Contract;
                    };
    "principal": principal;
@@ -670,11 +692,6 @@ type Action =
    actionType: text;
    params: blob;
    retries: nat;
- };
-type Account__1 = 
- record {
-   owner: principal;
-   subaccount: opt blob;
  };
 type Account = 
  record {

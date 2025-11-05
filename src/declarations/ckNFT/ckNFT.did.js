@@ -1,6 +1,6 @@
 export const idlFactory = ({ IDL }) => {
-  const ArchivedTransactionResponse = IDL.Rec();
   const CandyShared = IDL.Rec();
+  const GetTransactionsResult__1 = IDL.Rec();
   const Value = IDL.Rec();
   const Value__2 = IDL.Rec();
   const ArgList = IDL.Record({
@@ -56,6 +56,12 @@ export const idlFactory = ({ IDL }) => {
     'symbol' : IDL.Opt(IDL.Text),
   });
   const InitArgs__2 = IDL.Opt(ArgList__1);
+  const SolanaCluster = IDL.Variant({
+    'Mainnet' : IDL.Null,
+    'Custom' : IDL.Text,
+    'Testnet' : IDL.Null,
+    'Devnet' : IDL.Null,
+  });
   const PropertyShared = IDL.Record({
     'value' : CandyShared,
     'name' : IDL.Text,
@@ -94,7 +100,7 @@ export const idlFactory = ({ IDL }) => {
   const Network = IDL.Variant({
     'IC' : IDL.Opt(IDL.Text),
     'Ethereum' : IDL.Opt(IDL.Nat),
-    'Solana' : IDL.Opt(IDL.Nat),
+    'Solana' : IDL.Opt(SolanaCluster),
     'Bitcoin' : IDL.Opt(IDL.Text),
     'Other' : ICRC16Map,
   });
@@ -109,37 +115,38 @@ export const idlFactory = ({ IDL }) => {
   const InitArgs__3 = IDL.Opt(InitArgsList);
   const Account__1 = IDL.Record({
     'owner' : IDL.Principal,
-    'subaccount' : IDL.Opt(Subaccount),
-  });
-  const Account__5 = IDL.Record({
-    'owner' : IDL.Principal,
     'subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
   });
-  const RemoteContractPointer__1 = IDL.Record({
+  const Result_2 = IDL.Variant({
+    'ok' : IDL.Vec(IDL.Principal),
+    'err' : IDL.Text,
+  });
+  const RemoteAddressInfo = IDL.Record({
+    'altAddress' : IDL.Opt(IDL.Text),
     'contract' : IDL.Text,
     'network' : Network,
+    'atRestAccount' : IDL.Opt(Account__1),
+    'atRestDerivation' : IDL.Opt(IDL.Vec(IDL.Nat8)),
   });
-  const Account__2 = IDL.Record({
-    'owner' : IDL.Principal,
-    'subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
-  });
-  const RemoteOwner__1 = IDL.Variant({
+  const RemoteOwner = IDL.Variant({
     'remote' : IDL.Record({
-      'contract' : RemoteContractPointer__1,
+      'contract' : RemoteContractPointer,
       'owner' : IDL.Text,
       'timestamp' : IDL.Nat,
     }),
-    'local' : Account__2,
+    'local' : Account__1,
   });
   const Stats__1 = IDL.Record({
     'service' : IDL.Opt(IDL.Principal),
-    'originalMinterMap' : IDL.Vec(IDL.Tuple(IDL.Nat, Account__5)),
+    'originalMinterMap' : IDL.Vec(IDL.Tuple(IDL.Nat, Account__1)),
+    'solanaMintAddressMap' : IDL.Vec(IDL.Tuple(IDL.Nat, RemoteAddressInfo)),
     'nextCastId' : IDL.Nat,
     'orchestrator' : IDL.Principal,
     'cycleSettings' : IDL.Record({
       'amountPerETHCast' : IDL.Nat,
       'cycleLedgerCanister' : IDL.Principal,
       'amountPerBitcoinOwnerRequest' : IDL.Nat,
+      'amountPerSolanaCast' : IDL.Nat,
       'amountPerOtherOwnerRequest' : IDL.Nat,
       'amountPerICOwnerRequest' : IDL.Nat,
       'amountPerSolanaOwnerRequest' : IDL.Nat,
@@ -147,7 +154,7 @@ export const idlFactory = ({ IDL }) => {
       'amountBasePerOwnerRequest' : IDL.Nat,
     }),
     'nativeChain' : RemoteContractPointer,
-    'remoteOwnerMap' : IDL.Vec(IDL.Tuple(IDL.Nat, RemoteOwner__1)),
+    'remoteOwnerMap' : IDL.Vec(IDL.Tuple(IDL.Nat, RemoteOwner)),
   });
   const LedgerInfoShared = IDL.Record({
     'allow_transfers' : IDL.Bool,
@@ -182,20 +189,12 @@ export const idlFactory = ({ IDL }) => {
     'hash_tree' : IDL.Vec(IDL.Nat8),
     'last_block_hash' : IDL.Vec(IDL.Nat8),
   });
-  const SupportedStandards__1 = IDL.Vec(
-    IDL.Record({ 'url' : IDL.Text, 'name' : IDL.Text })
-  );
-  const Subaccount__1 = IDL.Vec(IDL.Nat8);
-  const Account__4 = IDL.Record({
-    'owner' : IDL.Principal,
-    'subaccount' : IDL.Opt(Subaccount__1),
-  });
   const ApprovalInfo = IDL.Record({
     'memo' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'from_subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'created_at_time' : IDL.Opt(IDL.Nat64),
     'expires_at' : IDL.Opt(IDL.Nat64),
-    'spender' : Account__4,
+    'spender' : Account,
   });
   const ApproveCollectionArg = IDL.Record({ 'approval_info' : ApprovalInfo });
   const ApproveCollectionError = IDL.Variant({
@@ -220,7 +219,7 @@ export const idlFactory = ({ IDL }) => {
     'token_id' : IDL.Nat,
     'approval_info' : ApprovalInfo,
   });
-  const ApproveTokenError__1 = IDL.Variant({
+  const ApproveTokenError = IDL.Variant({
     'GenericError' : IDL.Record({
       'message' : IDL.Text,
       'error_code' : IDL.Nat,
@@ -236,16 +235,16 @@ export const idlFactory = ({ IDL }) => {
     }),
     'TooOld' : IDL.Null,
   });
-  const ApproveTokenResult__1 = IDL.Variant({
+  const ApproveTokenResult = IDL.Variant({
     'Ok' : IDL.Nat,
-    'Err' : ApproveTokenError__1,
+    'Err' : ApproveTokenError,
   });
   const CollectionApproval = IDL.Record({
     'memo' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'from_subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'created_at_time' : IDL.Opt(IDL.Nat64),
     'expires_at' : IDL.Opt(IDL.Nat64),
-    'spender' : Account__4,
+    'spender' : Account,
   });
   const TokenApproval = IDL.Record({
     'token_id' : IDL.Nat,
@@ -254,13 +253,13 @@ export const idlFactory = ({ IDL }) => {
   const IsApprovedArg = IDL.Record({
     'token_id' : IDL.Nat,
     'from_subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
-    'spender' : Account__4,
+    'spender' : Account,
   });
   const RevokeCollectionApprovalArg = IDL.Record({
     'memo' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'from_subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'created_at_time' : IDL.Opt(IDL.Nat64),
-    'spender' : IDL.Opt(Account__4),
+    'spender' : IDL.Opt(Account),
   });
   const RevokeCollectionApprovalError = IDL.Variant({
     'GenericError' : IDL.Record({
@@ -286,7 +285,7 @@ export const idlFactory = ({ IDL }) => {
     'memo' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'from_subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'created_at_time' : IDL.Opt(IDL.Nat64),
-    'spender' : IDL.Opt(Account__4),
+    'spender' : IDL.Opt(Account),
   });
   const RevokeTokenApprovalError = IDL.Variant({
     'GenericError' : IDL.Record({
@@ -309,10 +308,10 @@ export const idlFactory = ({ IDL }) => {
     'Err' : RevokeTokenApprovalError,
   });
   const TransferFromArg = IDL.Record({
-    'to' : Account__4,
+    'to' : Account,
     'spender_subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'token_id' : IDL.Nat,
-    'from' : Account__4,
+    'from' : Account,
     'memo' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'created_at_time' : IDL.Opt(IDL.Nat64),
   });
@@ -357,44 +356,27 @@ export const idlFactory = ({ IDL }) => {
       'Array' : IDL.Vec(Value__2),
     })
   );
-  const TransactionRange__1 = IDL.Record({
-    'start' : IDL.Nat,
-    'length' : IDL.Nat,
-  });
-  const GetTransactionsResult__1 = IDL.Record({
-    'log_length' : IDL.Nat,
-    'blocks' : IDL.Vec(IDL.Record({ 'id' : IDL.Nat, 'block' : Value__2 })),
-    'archived_blocks' : IDL.Vec(ArchivedTransactionResponse),
-  });
   const GetTransactionsFn = IDL.Func(
-      [IDL.Vec(TransactionRange__1)],
+      [IDL.Vec(TransactionRange)],
       [GetTransactionsResult__1],
       ['query'],
     );
-  ArchivedTransactionResponse.fill(
+  const ArchivedTransactionResponse = IDL.Record({
+    'args' : IDL.Vec(TransactionRange),
+    'callback' : GetTransactionsFn,
+  });
+  GetTransactionsResult__1.fill(
     IDL.Record({
-      'args' : IDL.Vec(TransactionRange__1),
-      'callback' : GetTransactionsFn,
+      'log_length' : IDL.Nat,
+      'blocks' : IDL.Vec(IDL.Record({ 'id' : IDL.Nat, 'block' : Value__2 })),
+      'archived_blocks' : IDL.Vec(ArchivedTransactionResponse),
     })
   );
-  const GetTransactionsResult = IDL.Record({
-    'log_length' : IDL.Nat,
-    'blocks' : IDL.Vec(IDL.Record({ 'id' : IDL.Nat, 'block' : Value__2 })),
-    'archived_blocks' : IDL.Vec(ArchivedTransactionResponse),
-  });
   const DataCertificate = IDL.Record({
     'certificate' : IDL.Vec(IDL.Nat8),
     'hash_tree' : IDL.Vec(IDL.Nat8),
   });
-  const BlockType__1 = IDL.Record({
-    'url' : IDL.Text,
-    'block_type' : IDL.Text,
-  });
-  const Account__3 = IDL.Record({
-    'owner' : IDL.Principal,
-    'subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
-  });
-  const BalanceOfRequest = IDL.Vec(Account__3);
+  const BalanceOfRequest = IDL.Vec(Account__1);
   const BalanceOfResponse = IDL.Vec(IDL.Nat);
   Value.fill(
     IDL.Variant({
@@ -406,18 +388,10 @@ export const idlFactory = ({ IDL }) => {
       'Array' : IDL.Vec(Value),
     })
   );
-  const Value__1 = IDL.Variant({
-    'Int' : IDL.Int,
-    'Map' : IDL.Vec(IDL.Tuple(IDL.Text, Value)),
-    'Nat' : IDL.Nat,
-    'Blob' : IDL.Vec(IDL.Nat8),
-    'Text' : IDL.Text,
-    'Array' : IDL.Vec(Value),
-  });
   const OwnerOfRequest = IDL.Vec(IDL.Nat);
-  const OwnerOfResponse = IDL.Vec(IDL.Opt(Account__3));
+  const OwnerOfResponse = IDL.Vec(IDL.Opt(Account__1));
   const TransferArgs = IDL.Record({
-    'to' : Account__3,
+    'to' : Account__1,
     'token_id' : IDL.Nat,
     'memo' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'from_subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
@@ -440,19 +414,12 @@ export const idlFactory = ({ IDL }) => {
     'TooOld' : IDL.Null,
   });
   const TransferResult = IDL.Variant({ 'Ok' : IDL.Nat, 'Err' : TransferError });
-  const Network__1 = IDL.Variant({
-    'IC' : IDL.Opt(IDL.Text),
-    'Ethereum' : IDL.Opt(IDL.Nat),
-    'Solana' : IDL.Opt(IDL.Nat),
-    'Bitcoin' : IDL.Opt(IDL.Text),
-    'Other' : ICRC16Map,
-  });
   const CastRequest = IDL.Record({
     'tokenId' : IDL.Nat,
     'gasPrice' : IDL.Opt(IDL.Nat),
     'memo' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'fromSubaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
-    'remoteContract' : RemoteContractPointer__1,
+    'remoteContract' : RemoteContractPointer,
     'maxPriorityFeePerGas' : IDL.Opt(IDL.Nat),
     'created_at_time' : IDL.Opt(IDL.Nat),
     'gasLimit' : IDL.Opt(IDL.Nat),
@@ -489,7 +456,7 @@ export const idlFactory = ({ IDL }) => {
     'contract' : IDL.Text,
     'network' : Network,
   });
-  const CastStatus__1 = IDL.Variant({
+  const CastStatus = IDL.Variant({
     'Error' : CastError,
     'WaitingOnContract' : IDL.Record({ 'transaction' : IDL.Text }),
     'RemoteFinalized' : IDL.Text,
@@ -505,18 +472,10 @@ export const idlFactory = ({ IDL }) => {
   });
   const CastStateShared = IDL.Record({
     'startTime' : IDL.Nat,
-    'status' : CastStatus__1,
-    'history' : IDL.Vec(IDL.Tuple(CastStatus__1, IDL.Nat)),
+    'status' : CastStatus,
+    'history' : IDL.Vec(IDL.Tuple(CastStatus, IDL.Nat)),
     'castId' : IDL.Nat,
     'originalRequest' : CastRequest,
-  });
-  const RemoteOwner = IDL.Variant({
-    'remote' : IDL.Record({
-      'contract' : RemoteContractPointer__1,
-      'owner' : IDL.Text,
-      'timestamp' : IDL.Nat,
-    }),
-    'local' : Account__2,
   });
   const RemoteNFTPointer = IDL.Record({
     'tokenId' : IDL.Nat,
@@ -535,7 +494,7 @@ export const idlFactory = ({ IDL }) => {
     'NotFound' : IDL.Null,
     'InsufficientCycles' : IDL.Tuple(IDL.Nat, IDL.Nat),
     'Unauthorized' : IDL.Null,
-    'FoundLocally' : Account__2,
+    'FoundLocally' : Account__1,
     'QueryError' : IDL.Text,
   });
   const RemoteOwnerResult = IDL.Variant({
@@ -576,11 +535,11 @@ export const idlFactory = ({ IDL }) => {
   const NFTMap = IDL.Vec(IDL.Tuple(IDL.Text, Value));
   const MintNFTArgs = IDL.Record({
     'token_id' : IDL.Nat,
-    'owner' : Account__1,
+    'owner' : Account,
     'metadata' : NFTMap,
     'memo' : IDL.Opt(IDL.Vec(IDL.Nat8)),
     'created_at_time' : IDL.Opt(IDL.Nat64),
-    'spender' : IDL.Opt(Account__1),
+    'spender' : IDL.Opt(Account),
   });
   const SetNFTError = IDL.Variant({
     'GenericError' : IDL.Record({
@@ -600,43 +559,23 @@ export const idlFactory = ({ IDL }) => {
       'error_code' : IDL.Nat,
     }),
   });
-  const ApproveTokenError = IDL.Variant({
-    'GenericError' : IDL.Record({
-      'message' : IDL.Text,
-      'error_code' : IDL.Nat,
-    }),
-    'Duplicate' : IDL.Record({ 'duplicate_of' : IDL.Nat }),
-    'InvalidSpender' : IDL.Null,
-    'NonExistingTokenId' : IDL.Null,
-    'Unauthorized' : IDL.Null,
-    'CreatedInFuture' : IDL.Record({ 'ledger_time' : IDL.Nat64 }),
-    'GenericBatchError' : IDL.Record({
-      'message' : IDL.Text,
-      'error_code' : IDL.Nat,
-    }),
-    'TooOld' : IDL.Null,
-  });
-  const ApproveTokenResult = IDL.Variant({
-    'Ok' : IDL.Nat,
-    'Err' : ApproveTokenError,
-  });
-  const CastStatus = IDL.Variant({
-    'Error' : CastError,
-    'WaitingOnContract' : IDL.Record({ 'transaction' : IDL.Text }),
-    'RemoteFinalized' : IDL.Text,
-    'SubmittedToOrchestrator' : IDL.Record({
-      'localCastId' : IDL.Nat,
-      'remoteCastId' : IDL.Nat,
-    }),
-    'WaitingOnMint' : IDL.Record({ 'transaction' : IDL.Text }),
-    'WaitingOnTransfer' : IDL.Record({ 'transaction' : IDL.Text }),
-    'Created' : IDL.Null,
-    'Completed' : IDL.Nat,
-    'SubmittingToOrchestrator' : IDL.Nat,
-  });
+  const Result_1 = IDL.Variant({ 'ok' : IDL.Bool, 'err' : IDL.Text });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const CKNFTActor = IDL.Service({
-    'assign' : IDL.Func([IDL.Nat, Account__1], [IDL.Nat], []),
+    'assign' : IDL.Func(
+        [
+          IDL.Nat,
+          Account,
+          IDL.Opt(IDL.Text),
+          IDL.Opt(Network),
+          IDL.Opt(IDL.Vec(IDL.Nat8)),
+          IDL.Opt(Account__1),
+          IDL.Opt(IDL.Text),
+        ],
+        [IDL.Nat],
+        [],
+      ),
+    'get_minters' : IDL.Func([], [Result_2], ['query']),
     'get_stats' : IDL.Func(
         [],
         [IDL.Record({ 'icrc99' : Stats__1, 'icrc7' : Stats })],
@@ -645,7 +584,7 @@ export const idlFactory = ({ IDL }) => {
     'get_tip' : IDL.Func([], [Tip], ['query']),
     'icrc10_supported_standards' : IDL.Func(
         [],
-        [SupportedStandards__1],
+        [SupportedStandards],
         ['query'],
       ),
     'icrc37_approve_collection' : IDL.Func(
@@ -655,11 +594,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'icrc37_approve_tokens' : IDL.Func(
         [IDL.Vec(ApproveTokenArg)],
-        [IDL.Vec(IDL.Opt(ApproveTokenResult__1))],
+        [IDL.Vec(IDL.Opt(ApproveTokenResult))],
         [],
       ),
     'icrc37_get_collection_approvals' : IDL.Func(
-        [Account__1, IDL.Opt(CollectionApproval), IDL.Opt(IDL.Nat)],
+        [Account, IDL.Opt(CollectionApproval), IDL.Opt(IDL.Nat)],
         [IDL.Vec(CollectionApproval)],
         ['query'],
       ),
@@ -701,7 +640,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'icrc3_get_blocks' : IDL.Func(
         [IDL.Vec(TransactionRange)],
-        [GetTransactionsResult],
+        [GetTransactionsResult__1],
         ['query'],
       ),
     'icrc3_get_tip_certificate' : IDL.Func(
@@ -711,7 +650,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'icrc3_supported_block_types' : IDL.Func(
         [],
-        [IDL.Vec(BlockType__1)],
+        [IDL.Vec(BlockType)],
         ['query'],
       ),
     'icrc7_atomic_batch_transfers' : IDL.Func(
@@ -726,7 +665,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'icrc7_collection_metadata' : IDL.Func(
         [],
-        [IDL.Vec(IDL.Tuple(IDL.Text, Value__1))],
+        [IDL.Vec(IDL.Tuple(IDL.Text, Value))],
         ['query'],
       ),
     'icrc7_default_take_value' : IDL.Func([], [IDL.Opt(IDL.Nat)], ['query']),
@@ -743,7 +682,7 @@ export const idlFactory = ({ IDL }) => {
     'icrc7_symbol' : IDL.Func([], [IDL.Text], ['query']),
     'icrc7_token_metadata' : IDL.Func(
         [IDL.Vec(IDL.Nat)],
-        [IDL.Vec(IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, Value__1))))],
+        [IDL.Vec(IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, Value))))],
         ['query'],
       ),
     'icrc7_tokens' : IDL.Func(
@@ -752,7 +691,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'icrc7_tokens_of' : IDL.Func(
-        [Account__1, IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [Account, IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Nat)],
         ['query'],
       ),
@@ -765,38 +704,66 @@ export const idlFactory = ({ IDL }) => {
     'icrc7_tx_window' : IDL.Func([], [IDL.Opt(IDL.Nat)], ['query']),
     'icrc99_burn_fund_address' : IDL.Func(
         [IDL.Nat],
-        [IDL.Opt(IDL.Tuple(IDL.Text, Network__1))],
+        [IDL.Opt(IDL.Tuple(IDL.Text, Network))],
         [],
       ),
     'icrc99_cast' : IDL.Func(
-        [IDL.Vec(CastRequest), IDL.Opt(Account__1)],
+        [IDL.Vec(CastRequest), IDL.Opt(Account)],
         [IDL.Vec(IDL.Opt(CastResult))],
         [],
       ),
     'icrc99_cast_cost' : IDL.Func([CastCostRequest], [IDL.Nat], []),
+    'icrc99_cast_fund_address' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(IDL.Tuple(IDL.Text, Network))],
+        [],
+      ),
     'icrc99_cast_status' : IDL.Func(
-        [IDL.Vec(IDL.Nat), IDL.Opt(Account__1)],
+        [IDL.Vec(IDL.Nat), IDL.Opt(Account)],
         [IDL.Vec(IDL.Opt(CastStateShared))],
         [],
       ),
-    'icrc99_native_chain' : IDL.Func([], [RemoteContractPointer__1], ['query']),
+    'icrc99_get_remote_addresses' : IDL.Func(
+        [IDL.Vec(IDL.Nat)],
+        [IDL.Vec(IDL.Opt(RemoteAddressInfo))],
+        ['query'],
+      ),
+    'icrc99_native_chain' : IDL.Func([], [RemoteContractPointer], ['query']),
     'icrc99_remote_owner_of' : IDL.Func(
         [IDL.Vec(IDL.Nat)],
         [IDL.Vec(IDL.Opt(RemoteOwner))],
         ['query'],
       ),
     'icrc99_request_remote_owner_status' : IDL.Func(
-        [IDL.Vec(RequestRemoteOwnerRequest), IDL.Opt(Account__1)],
+        [IDL.Vec(RequestRemoteOwnerRequest), IDL.Opt(Account)],
         [IDL.Vec(IDL.Opt(RemoteOwnerResult))],
         [],
       ),
     'icrcX_burn' : IDL.Func([BurnNFTRequest], [BurnNFTBatchResponse], []),
+    'is_minter' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
     'mint_ck_nft' : IDL.Func(
         [MintNFTArgs],
         [SetNFTResult, IDL.Opt(ApproveTokenResult)],
         [],
       ),
+    'set_minter' : IDL.Func(
+        [IDL.Principal, IDL.Variant({ 'Add' : IDL.Null, 'Remove' : IDL.Null })],
+        [Result_1],
+        [],
+      ),
     'update_cast_status' : IDL.Func([IDL.Nat, CastStatus], [Result], []),
+    'update_nft_remote_address' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Text,
+          Network,
+          IDL.Vec(IDL.Nat8),
+          IDL.Opt(Account__1),
+          IDL.Opt(IDL.Text),
+        ],
+        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
+        [],
+      ),
   });
   return CKNFTActor;
 };
@@ -855,6 +822,12 @@ export const init = ({ IDL }) => {
     'symbol' : IDL.Opt(IDL.Text),
   });
   const InitArgs__2 = IDL.Opt(ArgList__1);
+  const SolanaCluster = IDL.Variant({
+    'Mainnet' : IDL.Null,
+    'Custom' : IDL.Text,
+    'Testnet' : IDL.Null,
+    'Devnet' : IDL.Null,
+  });
   const PropertyShared = IDL.Record({
     'value' : CandyShared,
     'name' : IDL.Text,
@@ -893,7 +866,7 @@ export const init = ({ IDL }) => {
   const Network = IDL.Variant({
     'IC' : IDL.Opt(IDL.Text),
     'Ethereum' : IDL.Opt(IDL.Nat),
-    'Solana' : IDL.Opt(IDL.Nat),
+    'Solana' : IDL.Opt(SolanaCluster),
     'Bitcoin' : IDL.Opt(IDL.Text),
     'Other' : ICRC16Map,
   });

@@ -1,15 +1,16 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 // Imports and re-exports candid interface
-import { idlFactory } from './ckNFT.did.js';
-export { idlFactory } from './ckNFT.did.js';
+import { idlFactory } from "./ckNFT.did.js";
+export { idlFactory } from "./ckNFT.did.js";
 
 /* CANISTER_ID is replaced by webpack based on node environment
- * Note: canister environment variables will be standardized as
+ * Note: canister environment variable will be standardized as
  * process.env.CANISTER_ID_<CANISTER_NAME_UPPERCASE>
  * beginning in dfx 0.15.0
  */
-export const canisterId = process.env.CANISTER_ID_CKNFT;
+export const canisterId =
+  process.env.CANISTER_ID_CKNFT;
 
 export const createActor = (canisterId, options = {}) => {
   const agent = options.agent || new HttpAgent({ ...options.agentOptions });
@@ -37,5 +38,3 @@ export const createActor = (canisterId, options = {}) => {
     ...options.actorOptions,
   });
 };
-
-export const ckNFT = canisterId ? createActor(canisterId) : undefined;

@@ -1,5 +1,6 @@
 export const idlFactory = ({ IDL }) => {
   const CandyShared = IDL.Rec();
+  const Result_1 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const EthSepoliaService = IDL.Variant({
     'Alchemy' : IDL.Null,
     'BlockPi' : IDL.Null,
@@ -43,6 +44,12 @@ export const idlFactory = ({ IDL }) => {
     'owner' : IDL.Principal,
     'subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
   });
+  const SolanaCluster = IDL.Variant({
+    'Mainnet' : IDL.Null,
+    'Custom' : IDL.Text,
+    'Testnet' : IDL.Null,
+    'Devnet' : IDL.Null,
+  });
   const PropertyShared = IDL.Record({
     'value' : CandyShared,
     'name' : IDL.Text,
@@ -81,7 +88,7 @@ export const idlFactory = ({ IDL }) => {
   const Network = IDL.Variant({
     'IC' : IDL.Opt(IDL.Text),
     'Ethereum' : IDL.Opt(IDL.Nat),
-    'Solana' : IDL.Opt(IDL.Nat),
+    'Solana' : IDL.Opt(SolanaCluster),
     'Bitcoin' : IDL.Opt(IDL.Text),
     'Other' : ICRC16Map,
   });
@@ -141,16 +148,22 @@ export const idlFactory = ({ IDL }) => {
     'EthMainnet' : EthMainnetService,
     'Provider' : ProviderId,
   });
-  const SolonaRPCService = IDL.Variant({ 'Generic' : RpcApi });
+  const SolanaRPCService = IDL.Variant({
+    'Custom' : IDL.Record({
+      'url' : IDL.Text,
+      'headers' : IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text))),
+    }),
+    'Provider' : IDL.Nat,
+  });
   const BitcoinRPCService = IDL.Variant({ 'Generic' : RpcApi });
-  const FusionRPCService__1 = IDL.Variant({
+  const FusionRPCService = IDL.Variant({
     'IC' : IDL.Record({ 'rpc' : ICRPCService, 'canisterId' : IDL.Principal }),
     'Ethereum' : IDL.Record({
       'rpc' : RpcService,
       'canisterId' : IDL.Principal,
     }),
     'Solana' : IDL.Record({
-      'rpc' : SolonaRPCService,
+      'rpc' : SolanaRPCService,
       'canisterId' : IDL.Principal,
     }),
     'Bitcoin' : IDL.Record({
@@ -160,9 +173,10 @@ export const idlFactory = ({ IDL }) => {
     'Other' : IDL.Vec(IDL.Tuple(IDL.Text, CandyShared)),
   });
   const OrchestratorConfig = IDL.Variant({
-    'SetTecdsaKeyName' : IDL.Text,
+    'SetEthTecdsaKeyName' : IDL.Text,
+    'SetSolanaSchnorrKeyName' : IDL.Text,
     'MapNetwork' : IDL.Record({
-      'service' : FusionRPCService__1,
+      'service' : FusionRPCService,
       'action' : IDL.Variant({ 'Add' : IDL.Null, 'Remove' : IDL.Null }),
       'network' : Network,
     }),
@@ -234,6 +248,13 @@ export const idlFactory = ({ IDL }) => {
   const CreateCanisterError = IDL.Variant({
     'RPC' : IDL.Variant({
       'Ethereum' : RpcError,
+      'Solana' : IDL.Variant({
+        'NetworkError' : IDL.Text,
+        'MetadataNotFound' : IDL.Text,
+        'ParseError' : IDL.Text,
+        'InvalidMint' : IDL.Text,
+        'TokenAccountNotFound' : IDL.Text,
+      }),
       'EthereumMultiSend' : MultiSendRawTransactionResult,
     }),
     'GenericError' : IDL.Text,
@@ -252,6 +273,13 @@ export const idlFactory = ({ IDL }) => {
   const CreateRemoteError = IDL.Variant({
     'RPC' : IDL.Variant({
       'Ethereum' : RpcError,
+      'Solana' : IDL.Variant({
+        'NetworkError' : IDL.Text,
+        'MetadataNotFound' : IDL.Text,
+        'ParseError' : IDL.Text,
+        'InvalidMint' : IDL.Text,
+        'TokenAccountNotFound' : IDL.Text,
+      }),
       'EthereumMultiSend' : MultiSendRawTransactionResult,
     }),
     'GenericError' : IDL.Text,
@@ -267,7 +295,8 @@ export const idlFactory = ({ IDL }) => {
     'Ok' : IDL.Nat,
     'Err' : CreateRemoteError,
   });
-  const ContractPointer__1 = IDL.Record({
+  const RemoteNFTPointer = IDL.Record({
+    'tokenId' : IDL.Nat,
     'contract' : IDL.Text,
     'network' : Network,
   });
@@ -285,25 +314,16 @@ export const idlFactory = ({ IDL }) => {
     'Completed' : IDL.Nat,
     'SubmittingToOrchestrator' : IDL.Nat,
   });
-  const RemoteNFTPointer = IDL.Record({
-    'tokenId' : IDL.Nat,
-    'contract' : IDL.Text,
-    'network' : Network,
-  });
-  const MintResumeOption = IDL.Variant({
-    'StartMetadataTransfer' : IDL.Null,
-    'StartMint' : IDL.Null,
-    'StartOwnershipVerification' : IDL.Null,
-  });
-  const MintRequest = IDL.Record({
-    'nft' : RemoteNFTPointer,
-    'resume' : IDL.Opt(IDL.Tuple(IDL.Nat, MintResumeOption)),
-    'mintToAccount' : Account,
-    'spender' : IDL.Opt(Account),
-  });
   const RemoteError = IDL.Variant({
     'RPC' : IDL.Variant({
       'Ethereum' : RpcError,
+      'Solana' : IDL.Variant({
+        'NetworkError' : IDL.Text,
+        'MetadataNotFound' : IDL.Text,
+        'ParseError' : IDL.Text,
+        'InvalidMint' : IDL.Text,
+        'TokenAccountNotFound' : IDL.Text,
+      }),
       'EthereumMultiSend' : MultiSendRawTransactionResult,
     }),
     'GenericError' : IDL.Text,
@@ -314,6 +334,18 @@ export const idlFactory = ({ IDL }) => {
     'Unauthorized' : IDL.Null,
     'NetworkRCPNotFound' : IDL.Null,
     'NotImplemented' : IDL.Null,
+  });
+  const GetCallResult = IDL.Variant({ 'Ok' : IDL.Text, 'Err' : RemoteError });
+  const MintResumeOption = IDL.Variant({
+    'StartMetadataTransfer' : IDL.Null,
+    'StartMint' : IDL.Null,
+    'StartOwnershipVerification' : IDL.Null,
+  });
+  const MintRequest = IDL.Record({
+    'nft' : RemoteNFTPointer,
+    'resume' : IDL.Opt(IDL.Tuple(IDL.Nat, MintResumeOption)),
+    'mintToAccount' : Account,
+    'spender' : IDL.Opt(Account),
   });
   const MintStatus = IDL.Variant({
     'Err' : IDL.Variant({
@@ -345,14 +377,7 @@ export const idlFactory = ({ IDL }) => {
       'retries' : IDL.Nat,
     }),
   });
-  const Network__2 = IDL.Variant({
-    'IC' : IDL.Opt(IDL.Text),
-    'Ethereum' : IDL.Opt(IDL.Nat),
-    'Solana' : IDL.Opt(IDL.Nat),
-    'Bitcoin' : IDL.Opt(IDL.Text),
-    'Other' : ICRC16Map,
-  });
-  const ContractStateShared__1 = IDL.Record({
+  const ContractStateShared = IDL.Record({
     'nextQuery' : IDL.Opt(IDL.Nat),
     'contractType' : IDL.Variant({
       'Remote' : IDL.Null,
@@ -371,11 +396,6 @@ export const idlFactory = ({ IDL }) => {
     'remoteNFTPointer' : RemoteNFTPointer,
     'account' : Account,
   });
-  const Account__1 = IDL.Record({
-    'owner' : IDL.Principal,
-    'subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
-  });
-  const GetCallResult = IDL.Variant({ 'Ok' : IDL.Text, 'Err' : RemoteError });
   const Time = IDL.Nat;
   const ActionId = IDL.Record({ 'id' : IDL.Nat, 'time' : Time });
   const Action = IDL.Record({
@@ -396,53 +416,15 @@ export const idlFactory = ({ IDL }) => {
     'expectedExecutionTime' : IDL.Opt(Time),
     'lastExecutionTime' : Time,
   });
-  const Network__1 = IDL.Variant({
-    'IC' : IDL.Opt(IDL.Text),
-    'Ethereum' : IDL.Opt(IDL.Nat),
-    'Solana' : IDL.Opt(IDL.Nat),
-    'Bitcoin' : IDL.Opt(IDL.Text),
-    'Other' : ICRC16Map,
-  });
   const Contract = IDL.Text;
   const CkNFTCanisterStateShared = IDL.Record({
     'principal' : IDL.Principal,
     'lastCycles' : IDL.Nat,
-    'network' : Network__1,
-    'networkMap' : IDL.Vec(IDL.Tuple(Network__1, Contract)),
+    'network' : Network,
+    'networkMap' : IDL.Vec(IDL.Tuple(Network, Contract)),
     'lastCyclesTimestamp' : IDL.Nat,
     'ckNFTCanisterId' : IDL.Nat,
     'nativeContract' : Contract,
-  });
-  const FusionRPCService = IDL.Variant({
-    'IC' : IDL.Record({ 'rpc' : ICRPCService, 'canisterId' : IDL.Principal }),
-    'Ethereum' : IDL.Record({
-      'rpc' : RpcService,
-      'canisterId' : IDL.Principal,
-    }),
-    'Solana' : IDL.Record({
-      'rpc' : SolonaRPCService,
-      'canisterId' : IDL.Principal,
-    }),
-    'Bitcoin' : IDL.Record({
-      'rpc' : BitcoinRPCService,
-      'canisterId' : IDL.Principal,
-    }),
-    'Other' : IDL.Vec(IDL.Tuple(IDL.Text, CandyShared)),
-  });
-  const ContractStateShared = IDL.Record({
-    'nextQuery' : IDL.Opt(IDL.Nat),
-    'contractType' : IDL.Variant({
-      'Remote' : IDL.Null,
-      'Owned' : ContractPointer,
-    }),
-    'network' : IDL.Opt(Network),
-    'writingContractCanisterId' : IDL.Opt(IDL.Text),
-    'ckNFTCanisterId' : IDL.Opt(IDL.Nat),
-    'address' : IDL.Opt(IDL.Text),
-    'confirmed' : IDL.Bool,
-    'deploymentTrx' : IDL.Opt(IDL.Text),
-    'contractId' : IDL.Nat,
-    'retries' : IDL.Opt(IDL.Nat),
   });
   const Stats = IDL.Record({
     'tt' : Stats__1,
@@ -455,6 +437,13 @@ export const idlFactory = ({ IDL }) => {
   const MintError = IDL.Variant({
     'RPC' : IDL.Variant({
       'Ethereum' : RpcError,
+      'Solana' : IDL.Variant({
+        'NetworkError' : IDL.Text,
+        'MetadataNotFound' : IDL.Text,
+        'ParseError' : IDL.Text,
+        'InvalidMint' : IDL.Text,
+        'TokenAccountNotFound' : IDL.Text,
+      }),
       'EthereumMultiSend' : MultiSendRawTransactionResult,
     }),
     'InvalidAccount' : IDL.Null,
@@ -474,7 +463,9 @@ export const idlFactory = ({ IDL }) => {
     'InvalidResumeOption' : IDL.Null,
   });
   const MintResult = IDL.Variant({ 'Ok' : MintRequestId, 'Err' : MintError });
+  const Result = IDL.Variant({ 'ok' : IDL.Text, 'err' : RemoteError });
   const OrchestratorActor = IDL.Service({
+    'add_approved_wasm_hash' : IDL.Func([IDL.Vec(IDL.Nat8)], [Result_1], []),
     'calc_eth_call_cycles' : IDL.Func(
         [RpcServices, IDL.Nat, IDL.Text],
         [IDL.Nat],
@@ -496,7 +487,18 @@ export const idlFactory = ({ IDL }) => {
         [CreateRemoteResponse],
         [],
       ),
-    'forceCkNFTCaniser' : IDL.Func([ContractPointer__1, IDL.Principal], [], []),
+    'forceCkNFTCaniser' : IDL.Func([ContractPointer, IDL.Principal], [], []),
+    'forceNonceForApprovalHash' : IDL.Func(
+        [IDL.Principal, RemoteNFTPointer, Account, IDL.Nat],
+        [],
+        [],
+      ),
+    'forceNonceForIcrc99Canister' : IDL.Func(
+        [IDL.Principal, Network, IDL.Nat],
+        [],
+        [],
+      ),
+    'get_approved_wasm_hashes' : IDL.Func([], [IDL.Vec(IDL.Vec(IDL.Nat8))], []),
     'get_cast_status' : IDL.Func(
         [IDL.Vec(IDL.Nat)],
         [IDL.Vec(IDL.Opt(CastStatus))],
@@ -506,6 +508,16 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(ContractPointer)],
         [IDL.Vec(IDL.Opt(IDL.Principal))],
         ['query'],
+      ),
+    'get_collection_name' : IDL.Func(
+        [IDL.Vec(RemoteNFTPointer), IDL.Opt(Account)],
+        [IDL.Vec(IDL.Opt(GetCallResult))],
+        [],
+      ),
+    'get_collection_symbol' : IDL.Func(
+        [IDL.Vec(RemoteNFTPointer), IDL.Opt(Account)],
+        [IDL.Vec(IDL.Opt(GetCallResult))],
+        [],
       ),
     'get_creation_cost' : IDL.Func([ContractPointer], [IDL.Nat], []),
     'get_icrc99_address' : IDL.Func(
@@ -524,8 +536,8 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'get_remote' : IDL.Func(
-        [IDL.Vec(IDL.Tuple(IDL.Principal, Network__2))],
-        [IDL.Vec(IDL.Opt(ContractStateShared__1))],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, Network))],
+        [IDL.Vec(IDL.Opt(ContractStateShared))],
         ['query'],
       ),
     'get_remote_approval_address' : IDL.Func(
@@ -539,23 +551,31 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'get_remote_meta' : IDL.Func(
-        [IDL.Vec(RemoteNFTPointer), IDL.Vec(IDL.Nat), IDL.Opt(Account__1)],
+        [IDL.Vec(RemoteNFTPointer), IDL.Vec(IDL.Nat), IDL.Opt(Account)],
         [IDL.Vec(IDL.Opt(GetCallResult))],
         [],
       ),
     'get_remote_owner' : IDL.Func(
-        [IDL.Vec(RemoteNFTPointer), IDL.Opt(Account__1)],
+        [IDL.Vec(RemoteNFTPointer), IDL.Opt(Account)],
         [IDL.Vec(IDL.Opt(GetCallResult))],
         [],
       ),
     'get_remote_status' : IDL.Func(
         [IDL.Vec(IDL.Nat)],
-        [IDL.Vec(IDL.Opt(ContractStateShared__1))],
+        [IDL.Vec(IDL.Opt(ContractStateShared))],
         ['query'],
       ),
     'get_stats' : IDL.Func([], [Stats], ['query']),
     'mint' : IDL.Func([MintRequest, IDL.Opt(Account)], [MintResult], []),
+    'register_ic_native_canister' : IDL.Func([IDL.Principal], [Result_1], []),
+    'remove_approved_wasm_hash' : IDL.Func([IDL.Vec(IDL.Nat8)], [Result_1], []),
+    'send_balance' : IDL.Func(
+        [IDL.Principal, IDL.Nat, IDL.Text, Network, IDL.Nat, IDL.Nat, IDL.Nat],
+        [Result],
+        [],
+      ),
     'system_upgrade' : IDL.Func([], [], []),
+    'test_schnorr' : IDL.Func([], [IDL.Text], []),
     'upgrade_ckNFT_canister' : IDL.Func([IDL.Principal], [], []),
   });
   return OrchestratorActor;
